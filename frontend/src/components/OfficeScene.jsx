@@ -1,8 +1,9 @@
 import React from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, ContactShadows } from '@react-three/drei'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { 
-  PodiumFloor, 
+  EnclosedDioramaRoom, 
   Desk01, 
   VaultSafe, 
   GlassWhiteboard, 
@@ -14,17 +15,17 @@ import { SimsAgentBot } from './AgentCharacter'
 
 export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
   return (
-    <div className="w-full h-full relative cursor-grab active:cursor-grabbing bg-gradient-to-b from-slate-100 to-slate-200">
+    <div className="w-full h-full relative cursor-grab active:cursor-grabbing bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50/40">
       <Canvas
         shadows
         orthographic
         camera={{
-          position: [22, 20, 22],
-          zoom: 40,
+          position: [24, 22, 24],
+          zoom: 38,
           near: 0.1,
           far: 500,
         }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       >
         <OrbitControls
           enableRotate={true}
@@ -32,33 +33,43 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
           minPolarAngle={Math.PI / 6}
           minZoom={18}
           maxZoom={90}
-          target={[0, 0.8, 0]}
+          target={[0, 0.9, 0]}
         />
 
-        {/* Clean Bright Studio Lighting (Pure White & Soft Daylight) */}
-        <ambientLight intensity={1.5} color="#ffffff" />
+        {/* Crisp Studio Ambient & Sunlight */}
+        <ambientLight intensity={1.4} color="#ffffff" />
         
+        {/* Main Soft Sunlight */}
         <directionalLight
-          position={[14, 28, 16]}
-          intensity={1.9}
+          position={[16, 30, 18]}
+          intensity={2.0}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
-          shadow-camera-far={65}
-          shadow-camera-left={-14}
-          shadow-camera-right={14}
-          shadow-camera-top={14}
-          shadow-camera-bottom={-14}
+          shadow-camera-far={70}
+          shadow-camera-left={-15}
+          shadow-camera-right={15}
+          shadow-camera-top={15}
+          shadow-camera-bottom={-15}
           shadow-bias={-0.0001}
           color="#ffffff"
         />
 
-        {/* Soft studio fill lights */}
-        <pointLight position={[-8, 6, 8]} intensity={0.5} color="#e0f2fe" />
-        <pointLight position={[8, 6, -8]} intensity={0.4} color="#f0f9ff" />
+        {/* Soft studio fill lights for rich depth */}
+        <pointLight position={[-8, 6, 8]} intensity={0.6} color="#e0f2fe" />
+        <pointLight position={[8, 8, -6]} intensity={0.5} color="#f0f9ff" />
 
-        {/* Elevated White Diorama Floor */}
-        <PodiumFloor />
+        {/* Enclosed The Sims Diorama: Back Wall & Left Wall with Glossy White Floor */}
+        <EnclosedDioramaRoom />
+
+        {/* Buttery-Smooth Contact Diffuse Shadows on Floor */}
+        <ContactShadows
+          position={[0, 0.01, 0]}
+          opacity={0.6}
+          scale={20}
+          blur={2.2}
+          far={4.5}
+        />
 
         {/* Workstation 1: Desk 01 (Active Compute) */}
         <Desk01
@@ -66,13 +77,13 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
           active={agents['blue-agent']?.isBusy}
         />
 
-        {/* Storage Vault in Back Left */}
+        {/* Storage Vault in Back Left Corner (Enclosed by Back & Left Wall) */}
         <VaultSafe position={[-6.2, 0, -4.2]} />
 
         {/* Glass Whiteboard in Center Back */}
         <GlassWhiteboard position={[-1.2, 0, -4.2]} />
 
-        {/* Kanban Wall in Back Right */}
+        {/* Kanban Wall in Back Right with Glowing Cyan Edge Backlight */}
         <KanbanWall position={[4.2, 0, -4.2]} />
 
         {/* Security Access Turnstile in Center Foreground */}
@@ -81,7 +92,7 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
         {/* Glass Entrance Doorway on Right */}
         <GlassEntryDoor position={[7.2, 0, 0]} />
 
-        {/* 5 Sims Capsule Bots (Matching referensi1.png) */}
+        {/* 5 Sims Capsule Bots */}
         {/* 1. Blue Bot (Desk 01 / Compute & Lead Scout) */}
         <SimsAgentBot
           id="blue-agent"
@@ -156,6 +167,16 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
           isSelected={selectedAgentId === 'green-agent'}
           rotationY={agents['green-agent']?.rotationY ?? Math.PI}
         />
+
+        {/* Postprocessing: Subtle Ethereal Bloom for glowing Kanban, Visor eyes & LED lights */}
+        <EffectComposer multisampling={4}>
+          <Bloom
+            luminanceThreshold={0.8}
+            luminanceSmoothing={0.9}
+            intensity={0.7}
+            radius={0.5}
+          />
+        </EffectComposer>
       </Canvas>
     </div>
   )

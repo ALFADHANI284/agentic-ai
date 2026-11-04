@@ -4,15 +4,15 @@ import { Html } from '@react-three/drei'
 import * as THREE from 'three'
 
 /**
- * The Sims / Capsule Bean Bot Character (Matching referensi1.png)
- * Glossy vibrant bean body, large round head, dark glass visor with glowing eyes,
- * floating label badge `• [name]-agent` and ground selection ring.
+ * Ultra-smooth The Sims / Capsule Bean Bot
+ * High-poly geometry, smooth designer-toy finish, glowing visor eyes,
+ * smooth organic idle/walk animations and glowing ground halo ring.
  */
 export function SimsAgentBot({
   id = 'blue-agent',
   name = 'blue-agent',
   role = 'Compute',
-  color = '#0284c7', // Primary body color (glossy blue, purple, yellow, orange, green)
+  color = '#0284c7',
   eyeColor = '#38bdf8',
   targetPos = [0, 0, 0],
   statusText = 'Idle',
@@ -26,70 +26,81 @@ export function SimsAgentBot({
   const headRef = useRef()
   const leftHandRef = useRef()
   const rightHandRef = useRef()
+  const haloRef = useRef()
   const targetVec = useRef(new THREE.Vector3(...targetPos))
 
   useFrame((state) => {
     if (!groupRef.current) return
     const t = state.clock.getElapsedTime()
 
-    // Smooth movement towards target
+    // Smooth movement towards target position
     targetVec.current.set(targetPos[0], targetPos[1], targetPos[2])
     groupRef.current.position.lerp(targetVec.current, 0.08)
 
-    // Smooth rotation
+    // Smooth rotation with damping
     groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, rotationY, 0.1)
 
-    // Cute procedural animations
+    // Smooth organic animations
     if (bodyRef.current) {
       if (isWalking) {
-        // Cute bouncing walk
-        bodyRef.current.position.y = 0.65 + Math.abs(Math.sin(t * 12)) * 0.12
-        bodyRef.current.rotation.z = Math.sin(t * 12) * 0.08
+        // Natural bipedal bouncing walk with tilt
+        bodyRef.current.position.y = 0.65 + Math.abs(Math.sin(t * 10)) * 0.1
+        bodyRef.current.rotation.z = Math.sin(t * 10) * 0.06
+        bodyRef.current.rotation.x = 0.08 // slight lean forward when walking
         if (leftHandRef.current && rightHandRef.current) {
-          leftHandRef.current.position.z = Math.sin(t * 12) * 0.2
-          rightHandRef.current.position.z = -Math.sin(t * 12) * 0.2
+          leftHandRef.current.position.z = Math.sin(t * 10) * 0.22
+          rightHandRef.current.position.z = -Math.sin(t * 10) * 0.22
+          leftHandRef.current.rotation.x = Math.sin(t * 10) * 0.4
+          rightHandRef.current.rotation.x = -Math.sin(t * 10) * 0.4
         }
       } else if (isBusy) {
-        // Rapid typing / working bob
-        bodyRef.current.position.y = 0.65 + Math.sin(t * 16) * 0.02
+        // Fluid typing animation
+        bodyRef.current.position.y = 0.65 + Math.sin(t * 14) * 0.015
         bodyRef.current.rotation.z = 0
+        bodyRef.current.rotation.x = 0.04
         if (leftHandRef.current && rightHandRef.current) {
-          leftHandRef.current.position.z = 0.28 + Math.sin(t * 20) * 0.08
-          rightHandRef.current.position.z = 0.28 + Math.cos(t * 20) * 0.08
-          leftHandRef.current.position.y = -0.05 + Math.sin(t * 18) * 0.04
-          rightHandRef.current.position.y = -0.05 + Math.cos(t * 18) * 0.04
+          leftHandRef.current.position.z = 0.26 + Math.sin(t * 18) * 0.06
+          rightHandRef.current.position.z = 0.26 + Math.cos(t * 18) * 0.06
+          leftHandRef.current.position.y = -0.04 + Math.sin(t * 16) * 0.03
+          rightHandRef.current.position.y = -0.04 + Math.cos(t * 16) * 0.03
         }
       } else {
-        // Cute breathing idle
-        bodyRef.current.position.y = 0.65 + Math.sin(t * 3) * 0.03
+        // Relaxed natural breathing
+        bodyRef.current.position.y = 0.65 + Math.sin(t * 2.5) * 0.025
         bodyRef.current.rotation.z = 0
+        bodyRef.current.rotation.x = 0
         if (leftHandRef.current && rightHandRef.current) {
-          leftHandRef.current.position.z = 0
-          rightHandRef.current.position.z = 0
-          leftHandRef.current.position.y = -0.05
-          rightHandRef.current.position.y = -0.05
+          leftHandRef.current.position.z = THREE.MathUtils.lerp(leftHandRef.current.position.z, 0, 0.1)
+          rightHandRef.current.position.z = THREE.MathUtils.lerp(rightHandRef.current.position.z, 0, 0.1)
+          leftHandRef.current.position.y = THREE.MathUtils.lerp(leftHandRef.current.position.y, -0.04, 0.1)
+          rightHandRef.current.position.y = THREE.MathUtils.lerp(rightHandRef.current.position.y, -0.04, 0.1)
         }
       }
     }
 
-    // Cute head tilt
+    // Natural head tilt and curiosity look
     if (headRef.current) {
-      headRef.current.rotation.y = Math.sin(t * 2) * 0.1
+      headRef.current.rotation.y = Math.sin(t * 1.8) * 0.08
+    }
+
+    // Pulsing selection halo
+    if (haloRef.current) {
+      haloRef.current.scale.setScalar(1 + Math.sin(t * 4) * 0.08)
     }
   })
 
   return (
     <group ref={groupRef} position={targetPos}>
-      {/* 3D Floating Pill Label overhead (Exact replica from referensi1.png: `• blue-agent`) */}
+      {/* 3D Floating Pill Label overhead (Exact replica: `• [name]-agent`) */}
       <Html
-        position={[0, 2.1, 0]}
+        position={[0, 2.2, 0]}
         center
         style={{ pointerEvents: 'none', userSelect: 'none' }}
       >
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md shadow-md border border-slate-200 text-slate-800 text-[10px] font-semibold whitespace-nowrap">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md shadow-md border border-slate-200 text-slate-800 text-[10px] font-bold whitespace-nowrap">
             <span
-              className="w-2 h-2 rounded-full"
+              className="w-2 h-2 rounded-full shadow-sm"
               style={{ backgroundColor: color }}
             />
             <span>{name}</span>
@@ -99,108 +110,111 @@ export function SimsAgentBot({
               </span>
             )}
           </div>
-          {/* Little pointer tail */}
           <div className="w-1.5 h-1.5 bg-white rotate-45 border-r border-b border-slate-200 -mt-0.5" />
         </div>
       </Html>
 
-      {/* Selected Ground Aura Ring */}
+      {/* Glowing Ground Selection Halo (Triggers Bloom) */}
       {isSelected && (
-        <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.55, 0.65, 32]} />
-          <meshBasicMaterial color={color} transparent opacity={0.8} />
-        </mesh>
+        <group ref={haloRef} position={[0, 0.02, 0]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.55, 0.68, 36]} />
+            <meshStandardMaterial
+              color={color}
+              emissive={color}
+              emissiveIntensity={1.8}
+              transparent
+              opacity={0.85}
+            />
+          </mesh>
+          <pointLight position={[0, 0.2, 0]} intensity={0.8} distance={1.8} color={color} />
+        </group>
       )}
-
-      {/* Soft Contact Shadow on Floor */}
-      <mesh position={[0, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.42, 24]} />
-        <meshBasicMaterial color="#94a3b8" transparent opacity={0.35} />
-      </mesh>
 
       {/* Bot Hierarchy */}
       <group ref={bodyRef} position={[0, 0.65, 0]}>
-        {/* Chubby Bean Body (Capsule/Sphere with glossy finish) */}
-        <mesh castShadow position={[0, -0.05, 0]}>
-          <capsuleGeometry args={[0.26, 0.28, 12, 16]} />
+        {/* Chubby Glossy Capsule Body */}
+        <mesh castShadow position={[0, -0.04, 0]}>
+          <capsuleGeometry args={[0.27, 0.32, 24, 32]} />
           <meshStandardMaterial
             color={color}
-            roughness={0.15}
-            metalness={0.1}
+            roughness={0.12}
+            metalness={0.08}
           />
         </mesh>
 
-        {/* Head */}
-        <group ref={headRef} position={[0, 0.42, 0]}>
-          {/* Round Head Shell */}
+        {/* Round Head Shell */}
+        <group ref={headRef} position={[0, 0.44, 0]}>
           <mesh castShadow>
-            <sphereGeometry args={[0.32, 24, 24]} />
+            <sphereGeometry args={[0.34, 32, 32]} />
+            <meshStandardMaterial
+              color={color}
+              roughness={0.12}
+              metalness={0.08}
+            />
+          </mesh>
+
+          {/* Dark Curved Glass Visor Screen Face */}
+          <mesh position={[0, 0.02, 0.24]}>
+            <boxGeometry args={[0.44, 0.22, 0.14]} />
+            <meshStandardMaterial
+              color="#050811"
+              roughness={0.15}
+              metalness={0.85}
+            />
+          </mesh>
+
+          {/* Glowing Visor Eyes (Triggers Bloom Glow!) */}
+          <mesh position={[-0.1, 0.03, 0.32]}>
+            <capsuleGeometry args={[0.035, 0.07, 8, 12]} />
+            <meshStandardMaterial
+              color={eyeColor}
+              emissive={eyeColor}
+              emissiveIntensity={2.5}
+            />
+          </mesh>
+          <mesh position={[0.1, 0.03, 0.32]}>
+            <capsuleGeometry args={[0.035, 0.07, 8, 12]} />
+            <meshStandardMaterial
+              color={eyeColor}
+              emissive={eyeColor}
+              emissiveIntensity={2.5}
+            />
+          </mesh>
+        </group>
+
+        {/* Left Smooth Floating Hand */}
+        <group ref={leftHandRef} position={[-0.36, -0.04, 0]}>
+          <mesh castShadow>
+            <sphereGeometry args={[0.1, 16, 16]} />
             <meshStandardMaterial
               color={color}
               roughness={0.15}
-              metalness={0.1}
-            />
-          </mesh>
-
-          {/* Dark Glass Visor Screen Face */}
-          <mesh position={[0, 0.02, 0.22]}>
-            <boxGeometry args={[0.42, 0.22, 0.14]} />
-            <meshStandardMaterial
-              color="#090d16"
-              roughness={0.2}
-              metalness={0.8}
-            />
-          </mesh>
-
-          {/* Cute Glowing Visor Eyes (Horizontal Capsule Eyes) */}
-          <mesh position={[-0.1, 0.03, 0.3]}>
-            <capsuleGeometry args={[0.035, 0.06, 6, 8]} />
-            <meshStandardMaterial
-              color={eyeColor}
-              emissive={eyeColor}
-              emissiveIntensity={1.5}
-            />
-          </mesh>
-          <mesh position={[0.1, 0.03, 0.3]}>
-            <capsuleGeometry args={[0.035, 0.06, 6, 8]} />
-            <meshStandardMaterial
-              color={eyeColor}
-              emissive={eyeColor}
-              emissiveIntensity={1.5}
+              metalness={0.05}
             />
           </mesh>
         </group>
 
-        {/* Left Floating Hand */}
-        <group ref={leftHandRef} position={[-0.34, -0.05, 0]}>
+        {/* Right Smooth Floating Hand */}
+        <group ref={rightHandRef} position={[0.36, -0.04, 0]}>
           <mesh castShadow>
-            <sphereGeometry args={[0.09, 12, 12]} />
+            <sphereGeometry args={[0.1, 16, 16]} />
             <meshStandardMaterial
               color={color}
-              roughness={0.2}
+              roughness={0.15}
+              metalness={0.05}
             />
           </mesh>
         </group>
 
-        {/* Right Floating Hand */}
-        <group ref={rightHandRef} position={[0.34, -0.05, 0]}>
-          <mesh castShadow>
-            <sphereGeometry args={[0.09, 12, 12]} />
-            <meshStandardMaterial
-              color={color}
-              roughness={0.2}
-            />
-          </mesh>
-        </group>
-
-        {/* Cute Stubby Feet */}
-        <mesh position={[-0.14, -0.42, 0.05]}>
-          <sphereGeometry args={[0.1, 10, 10]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.4} />
+        {/* Cute Feet */}
+        <mesh position={[-0.14, -0.44, 0.05]}>
+          <sphereGeometry args={[0.1, 16, 16]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.3} />
         </mesh>
-        <mesh position={[0.14, -0.42, 0.05]}>
-          <sphereGeometry args={[0.1, 10, 10]} />
-          <meshStandardMaterial color="#0f172a" roughness={0.4} />
+        <mesh position={[0.14, -0.44, 0.05]}>
+          <sphereGeometry args={[0.1, 16, 16]} />
+          <meshStandardMaterial color="#0f172a" roughness={0.3} />
         </mesh>
       </group>
     </group>
