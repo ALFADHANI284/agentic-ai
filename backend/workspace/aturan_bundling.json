@@ -1,0 +1,14 @@
+{
+  "MTR-01": {
+    "cross_sell": ["ACC-01", "SRV-01"],
+    "catatan_sales": "Fokus efisiensi komuter. Bundling wajib dengan helm retro dan voucher servis 1 tahun."
+  },
+  "MTR-02": {
+    "cross_sell": ["ACC-01", "SRV-02"],
+    "catatan_sales": "Karakter sporty perkotaan. Tawarkan helm retro dan paket proteksi garansi mesin."
+  },
+  "MTR-03": {
+    "cross_sell": ["ACC-02", "SRV-02"],
+    "catatan_sales": "Segmen maxi touring. Wajib satu paket dengan jaket all-weather dan garansi extended mesin 2 tahun."
+  }
+}
