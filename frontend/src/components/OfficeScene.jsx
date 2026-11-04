@@ -3,19 +3,24 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, ContactShadows } from '@react-three/drei'
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { 
-  EnclosedDioramaRoom, 
-  Desk01, 
+  DioramaRoom, 
+  ModernDeskWorkstation, 
   VaultSafe, 
-  GlassWhiteboard, 
   KanbanWall, 
   SecurityTurnstile, 
-  GlassEntryDoor 
+  PottedPlant 
 } from './OfficeElements'
-import { SimsAgentBot } from './AgentCharacter'
+import { RobotAgent } from './AgentCharacter'
 
 export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
+  // Ambil state dinamis jika ada dari props App, atau default
+  const blueAgent = agents?.['blue-agent'] || { isTyping: true, statusText: 'Active Compute' }
+  const purpleAgent = agents?.['purple-agent'] || { isTyping: false, statusText: 'Task Manager' }
+  const orangeAgent = agents?.['orange-agent'] || { isTyping: false, statusText: 'Vault Storage' }
+  const greenAgent = agents?.['green-agent'] || { isTyping: false, statusText: 'Gate Control' }
+
   return (
-    <div className="w-full h-full relative cursor-grab active:cursor-grabbing bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50/40">
+    <div className="w-full h-full relative cursor-grab active:cursor-grabbing bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50/50">
       <Canvas
         shadows
         orthographic
@@ -29,20 +34,20 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
       >
         <OrbitControls
           enableRotate={true}
-          maxPolarAngle={Math.PI / 2.3}
+          maxPolarAngle={Math.PI / 2.28}
           minPolarAngle={Math.PI / 6}
           minZoom={18}
           maxZoom={90}
-          target={[0, 0.9, 0]}
+          target={[0, 1.0, 0]}
         />
 
-        {/* Crisp Studio Ambient & Sunlight */}
-        <ambientLight intensity={1.4} color="#ffffff" />
+        {/* Studio Lighting Bersih & Alami */}
+        <ambientLight intensity={1.3} color="#ffffff" />
         
-        {/* Main Soft Sunlight */}
+        {/* Lampu Utama Matahari / Keylight */}
         <directionalLight
-          position={[16, 30, 18]}
-          intensity={2.0}
+          position={[18, 30, 20]}
+          intensity={1.9}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -55,126 +60,112 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
           color="#ffffff"
         />
 
-        {/* Soft studio fill lights for rich depth */}
-        <pointLight position={[-8, 6, 8]} intensity={0.6} color="#e0f2fe" />
-        <pointLight position={[8, 8, -6]} intensity={0.5} color="#f0f9ff" />
+        {/* Lampu Fill Lembut Studio */}
+        <pointLight position={[-8, 8, 8]} intensity={0.5} color="#e0f2fe" />
+        <pointLight position={[8, 8, -6]} intensity={0.4} color="#f0f9ff" />
 
-        {/* Enclosed The Sims Diorama: Back Wall & Left Wall with Glossy White Floor */}
-        <EnclosedDioramaRoom />
+        {/* 3. Komponen Ruangan Diorama (Isometric Office):
+            - Lantai slab tebal putih glossy dengan list bawah kayu/cokelat.
+            - Partisi dinding kaca frosted glass MeshPhysicalMaterial.
+        */}
+        <DioramaRoom />
 
-        {/* Buttery-Smooth Contact Diffuse Shadows on Floor */}
+        {/* Bayangan Kontak Halus di Permukaan Lantai */}
         <ContactShadows
-          position={[0, 0.01, 0]}
-          opacity={0.6}
+          position={[0, 0.185, 0]}
+          opacity={0.55}
           scale={20}
           blur={2.2}
-          far={4.5}
+          far={4.0}
         />
 
-        {/* Workstation 1: Desk 01 (Active Compute) */}
-        <Desk01
-          position={[-3.8, 0, 0.2]}
-          active={agents['blue-agent']?.isBusy}
+        {/* 4. Meja Kerja Kayu Modern dengan Dual Monitor Coding, Keyboard Mini & Kursi Ergonomis
+            + 6. Floating Badge "Desk 01 • Active Compute"
+        */}
+        <ModernDeskWorkstation
+          position={[-4.0, 0.18, 0.5]}
+          isTyping={blueAgent.isTyping ?? true}
         />
 
-        {/* Storage Vault in Back Left Corner (Enclosed by Back & Left Wall) */}
-        <VaultSafe position={[-6.2, 0, -4.2]} />
+        {/* 4. Brankas (Vault) Baja Silver Tebal dengan Pintu Semi-Terbuka
+            + 6. Floating Badge "Vault • Secure Storage"
+        */}
+        <VaultSafe position={[-6.2, 0.18, -4.5]} />
 
-        {/* Glass Whiteboard in Center Back */}
-        <GlassWhiteboard position={[-1.2, 0, -4.2]} />
+        {/* 4. Papan Kanban Kaca Melayang dengan Kolom (Backlog, In Progress, Review, Done) & Kartu Tugas
+            + 6. Floating Badge "Kanban Wall • 12 Active"
+        */}
+        <KanbanWall position={[4.2, 0.18, -4.5]} />
 
-        {/* Kanban Wall in Back Right with Glowing Cyan Edge Backlight */}
-        <KanbanWall position={[4.2, 0, -4.2]} />
+        {/* 3. Turnstile Security Gate Stainless Steel di Dekat Pintu Masuk
+            + 6. Floating Badge "Security Gate • Access Control"
+        */}
+        <SecurityTurnstile position={[0.8, 0.18, 2.8]} />
 
-        {/* Security Access Turnstile in Center Foreground */}
-        <SecurityTurnstile position={[0.8, 0, 2.8]} />
+        {/* 4. Tanaman Hias Pot Kecil di Sudut Lantai */}
+        <PottedPlant position={[7.5, 0.18, -5.5]} scale={1.1} />
+        <PottedPlant position={[-7.5, 0.18, 5.0]} scale={0.9} />
+        <PottedPlant position={[7.2, 0.18, 5.0]} scale={0.9} />
 
-        {/* Glass Entrance Doorway on Right */}
-        <GlassEntryDoor position={[7.2, 0, 0]} />
+        {/* 5. Empat Karakter AI Robot Mini (Capsule Bot Component):
+            - Tubuh: CapsuleGeometry glossy
+            - Wajah: lekukan hitam pekat
+            - Mata digital: dua titik bola cyan menyala (emissive="#00f3ff")
+            - Tangan & kaki silinder
+            - Animasi floating idle & sitting typing
+        */}
 
-        {/* 5 Sims Capsule Bots */}
-        {/* 1. Blue Bot (Desk 01 / Compute & Lead Scout) */}
-        <SimsAgentBot
-          id="blue-agent"
-          name="blue-agent"
-          role="Compute"
+        {/* 1. Robot Biru: Duduk mengetik di meja kerja (Active Compute) */}
+        <RobotAgent
           color="#0284c7"
-          eyeColor="#38bdf8"
-          targetPos={agents['blue-agent']?.pos || [-3.8, 0, 1.15]}
-          statusText={agents['blue-agent']?.statusText || 'Scoring Leads'}
-          isBusy={agents['blue-agent']?.isBusy}
-          isWalking={agents['blue-agent']?.isWalking}
+          position={[-4.0, 0.18, 1.45]}
+          rotation={[0, Math.PI, 0]}
+          isTyping={blueAgent.isTyping ?? true}
+          label="Robot Biru"
+          status={blueAgent.statusText || 'Active Compute'}
           isSelected={selectedAgentId === 'blue-agent'}
-          rotationY={agents['blue-agent']?.rotationY ?? Math.PI}
         />
 
-        {/* 2. Purple Bot (Kanban Wall / Sales AI Pitcher) */}
-        <SimsAgentBot
-          id="purple-agent"
-          name="purple-agent"
-          role="Sales AI"
-          color="#9333ea"
-          eyeColor="#c084fc"
-          targetPos={agents['purple-agent']?.pos || [3.6, 0, -3.2]}
-          statusText={agents['purple-agent']?.statusText || 'Syncing Kanban'}
-          isBusy={agents['purple-agent']?.isBusy}
-          isWalking={agents['purple-agent']?.isWalking}
-          isSelected={selectedAgentId === 'purple-agent'}
-          rotationY={agents['purple-agent']?.rotationY ?? Math.PI}
-        />
-
-        {/* 3. Yellow Bot (Security Turnstile / Approval Supervisor) */}
-        <SimsAgentBot
-          id="yellow-agent"
-          name="yellow-agent"
-          role="Gatekeeper"
-          color="#eab308"
-          eyeColor="#fef08a"
-          targetPos={agents['yellow-agent']?.pos || [2.4, 0, 2.6]}
-          statusText={agents['yellow-agent']?.statusText || 'Access Control'}
-          isBusy={agents['yellow-agent']?.isBusy}
-          isWalking={agents['yellow-agent']?.isWalking}
-          isSelected={selectedAgentId === 'yellow-agent'}
-          rotationY={agents['yellow-agent']?.rotationY ?? -Math.PI / 2}
-        />
-
-        {/* 4. Orange Bot (Whiteboard / Strategist) */}
-        <SimsAgentBot
-          id="orange-agent"
-          name="orange-agent"
-          role="Strategist"
-          color="#f97316"
-          eyeColor="#fed7aa"
-          targetPos={agents['orange-agent']?.pos || [-2.2, 0, -3.2]}
-          statusText={agents['orange-agent']?.statusText || 'Planning Flow'}
-          isBusy={agents['orange-agent']?.isBusy}
-          isWalking={agents['orange-agent']?.isWalking}
+        {/* 2. Robot Oranye: Berdiri di dekat Brankas baja (Vault Storage) */}
+        <RobotAgent
+          color="#ea580c"
+          position={[-4.2, 0.18, -3.8]}
+          rotation={[0, Math.PI / 4, 0]}
+          isTyping={false}
+          label="Robot Oranye"
+          status={orangeAgent.statusText || 'Vault Storage'}
           isSelected={selectedAgentId === 'orange-agent'}
-          rotationY={agents['orange-agent']?.rotationY ?? Math.PI}
         />
 
-        {/* 5. Green Bot (Whiteboard / Researcher) */}
-        <SimsAgentBot
-          id="green-agent"
-          name="green-agent"
-          role="Research"
-          color="#22c55e"
-          eyeColor="#86efac"
-          targetPos={agents['green-agent']?.pos || [-0.4, 0, -3.2]}
-          statusText={agents['green-agent']?.statusText || 'Catalog Match'}
-          isBusy={agents['green-agent']?.isBusy}
-          isWalking={agents['green-agent']?.isWalking}
+        {/* 3. Robot Hijau: Berjalan di area tengah dekat gate */}
+        <RobotAgent
+          color="#16a34a"
+          position={[1.8, 0.18, 2.2]}
+          rotation={[0, -Math.PI / 3, 0]}
+          isTyping={false}
+          label="Robot Hijau"
+          status={greenAgent.statusText || 'Gate Access'}
           isSelected={selectedAgentId === 'green-agent'}
-          rotationY={agents['green-agent']?.rotationY ?? Math.PI}
         />
 
-        {/* Postprocessing: Subtle Ethereal Bloom for glowing Kanban, Visor eyes & LED lights */}
+        {/* 4. Robot Ungu: Berdiri menghadap papan Kanban (Task Manager) */}
+        <RobotAgent
+          color="#9333ea"
+          position={[4.2, 0.18, -2.8]}
+          rotation={[0, Math.PI, 0]}
+          isTyping={purpleAgent.isTyping ?? false}
+          label="Robot Ungu"
+          status={purpleAgent.statusText || 'Task Manager'}
+          isSelected={selectedAgentId === 'purple-agent'}
+        />
+
+        {/* Post-processing Bloom untuk Pendaran Mata Cyan & Layar Monitor */}
         <EffectComposer multisampling={4}>
           <Bloom
             luminanceThreshold={0.8}
             luminanceSmoothing={0.9}
-            intensity={0.7}
-            radius={0.5}
+            intensity={0.65}
+            radius={0.4}
           />
         </EffectComposer>
       </Canvas>

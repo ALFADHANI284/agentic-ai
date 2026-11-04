@@ -4,61 +4,46 @@ import { DashboardOverlay } from './components/DashboardOverlay'
 
 const API_BASE = 'http://127.0.0.1:8000'
 
-// Default positions matching referensi1.png diorama
+// 4 Agen Robot Mini Sesuai Spesifikasi Poin 5
 const INITIAL_AGENTS = {
   'blue-agent': {
     id: 'blue-agent',
-    name: 'blue-agent',
+    name: 'Robot Biru',
     role: 'Compute',
     color: '#0284c7',
-    pos: [-3.8, 0, 1.15],
+    pos: [-4.0, 0.18, 1.45],
     statusText: 'Active Compute',
-    isBusy: false,
-    isWalking: false,
+    isTyping: true,
     rotationY: Math.PI,
-  },
-  'purple-agent': {
-    id: 'purple-agent',
-    name: 'purple-agent',
-    role: 'Sales AI',
-    color: '#9333ea',
-    pos: [3.6, 0, -3.2],
-    statusText: 'Kanban sync',
-    isBusy: false,
-    isWalking: false,
-    rotationY: Math.PI,
-  },
-  'yellow-agent': {
-    id: 'yellow-agent',
-    name: 'yellow-agent',
-    role: 'Gatekeeper',
-    color: '#eab308',
-    pos: [2.2, 0, 2.6],
-    statusText: 'Access Control',
-    isBusy: false,
-    isWalking: false,
-    rotationY: -Math.PI / 2,
   },
   'orange-agent': {
     id: 'orange-agent',
-    name: 'orange-agent',
-    role: 'Strategist',
-    color: '#f97316',
-    pos: [-2.2, 0, -3.2],
-    statusText: 'Ideas & Planning',
-    isBusy: false,
-    isWalking: false,
-    rotationY: Math.PI,
+    name: 'Robot Oranye',
+    role: 'Vault Storage',
+    color: '#ea580c',
+    pos: [-4.2, 0.18, -3.8],
+    statusText: 'Vault Storage',
+    isTyping: false,
+    rotationY: Math.PI / 4,
   },
   'green-agent': {
     id: 'green-agent',
-    name: 'green-agent',
-    role: 'Research',
-    color: '#22c55e',
-    pos: [-0.6, 0, -3.2],
-    statusText: 'Catalog Match',
-    isBusy: false,
-    isWalking: false,
+    name: 'Robot Hijau',
+    role: 'Gate Control',
+    color: '#16a34a',
+    pos: [1.8, 0.18, 2.2],
+    statusText: 'Access Control',
+    isTyping: false,
+    rotationY: -Math.PI / 3,
+  },
+  'purple-agent': {
+    id: 'purple-agent',
+    name: 'Robot Ungu',
+    role: 'Task Manager',
+    color: '#9333ea',
+    pos: [4.2, 0.18, -2.8],
+    statusText: 'Task Manager',
+    isTyping: false,
     rotationY: Math.PI,
   },
 }
@@ -72,24 +57,22 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [pitchResult, setPitchResult] = useState(null)
 
-  // Fetch initial health and leads queue from FastAPI
+  // Fetch initial health & leads queue dari FastAPI
   const fetchData = async () => {
     try {
-      // 1. Health check
       const healthRes = await fetch(`${API_BASE}/api/v1/system/health`)
       if (healthRes.ok) {
         const data = await healthRes.json()
         setSystemInfo(data)
       }
 
-      // 2. Leads queue
       const leadsRes = await fetch(`${API_BASE}/api/v1/leads/queue`)
       if (leadsRes.ok) {
         const data = await leadsRes.json()
         setLeads(data.leads || [])
       }
     } catch {
-      // Fallback simulation when backend is offline
+      // Fallback simulasi saat backend offline
       setSystemInfo({
         status: 'simulated',
         appliance: 'MSI Cubi NUC AI+ B206',
@@ -128,18 +111,21 @@ export default function App() {
     fetchData()
   }, [])
 
-  // Action: Assign lead to agent for pitch generation
+  // Aksi: Tugaskan lead ke agen
   const handleSelectLead = async (lead) => {
     setActiveLead(lead)
     setIsGenerating(true)
     setPitchResult(null)
     setSelectedAgentId('purple-agent')
 
-    // Animate Blue Agent (Scout compute) and Purple Agent (Pitch draft)
+    // Robot Ungu mulai mengetik draf di depan papan Kanban
     setAgents((prev) => ({
       ...prev,
-      'blue-agent': { ...prev['blue-agent'], isBusy: true, statusText: `Scoring ${lead.nama}` },
-      'purple-agent': { ...prev['purple-agent'], isBusy: true, statusText: `Drafting Qwen Pitch...` },
+      'purple-agent': {
+        ...prev['purple-agent'],
+        isTyping: true,
+        statusText: `Drafting Pitch ${lead.nama}...`,
+      },
     }))
 
     try {
@@ -163,16 +149,14 @@ export default function App() {
 
       setPitchResult(data)
       setIsGenerating(false)
-      setSelectedAgentId('yellow-agent') // Select gatekeeper for approval
+      setSelectedAgentId('green-agent')
 
       setAgents((prev) => ({
         ...prev,
-        'blue-agent': { ...prev['blue-agent'], isBusy: false, statusText: 'Active Compute' },
-        'purple-agent': { ...prev['purple-agent'], isBusy: false, statusText: 'Pitch Ready' },
-        'yellow-agent': { ...prev['yellow-agent'], isBusy: true, statusText: 'Approval Required' },
+        'purple-agent': { ...prev['purple-agent'], isTyping: false, statusText: 'Pitch Ready' },
+        'green-agent': { ...prev['green-agent'], statusText: 'Approval Required' },
       }))
     } catch {
-      // Offline fallback pitch
       const fallbackData = {
         id_lead: lead.id_lead,
         unit_rekomendasi: 'Beat Street',
@@ -181,31 +165,30 @@ export default function App() {
       }
       setPitchResult(fallbackData)
       setIsGenerating(false)
-      setSelectedAgentId('yellow-agent')
+      setSelectedAgentId('green-agent')
 
       setAgents((prev) => ({
         ...prev,
-        'blue-agent': { ...prev['blue-agent'], isBusy: false, statusText: 'Active Compute' },
-        'purple-agent': { ...prev['purple-agent'], isBusy: false, statusText: 'Pitch Ready (Simulated)' },
-        'yellow-agent': { ...prev['yellow-agent'], isBusy: true, statusText: 'Approval Required' },
+        'purple-agent': { ...prev['purple-agent'], isTyping: false, statusText: 'Pitch Ready (Simulated)' },
+        'green-agent': { ...prev['green-agent'], statusText: 'Approval Required' },
       }))
     }
   }
 
-  // Action: Approve & Send outreach via Gateway
+  // Aksi: Setujui & Dispatch WhatsApp
   const handleApprovePitch = async (payload) => {
     if (!payload) {
       setPitchResult(null)
       setAgents((prev) => ({
         ...prev,
-        'yellow-agent': { ...prev['yellow-agent'], isBusy: false, statusText: 'Access Control' },
+        'green-agent': { ...prev['green-agent'], statusText: 'Access Control' },
       }))
       return
     }
 
     setAgents((prev) => ({
       ...prev,
-      'yellow-agent': { ...prev['yellow-agent'], isBusy: true, statusText: 'Dispatching WhatsApp...' },
+      'green-agent': { ...prev['green-agent'], statusText: 'Dispatching WA...' },
     }))
 
     try {
@@ -229,14 +212,14 @@ export default function App() {
 
   return (
     <main className="w-screen h-screen relative bg-slate-100 overflow-hidden select-none">
-      {/* 3D The Sims Isometric Office Diorama */}
+      {/* 3D Diorama Ruangan Kantor Isometrik */}
       <OfficeScene
         agents={agents}
         selectedAgentId={selectedAgentId}
         onSelectAgent={setSelectedAgentId}
       />
 
-      {/* Modern White / Blue SaaS Overlay */}
+      {/* Modern White & Blue Dashboard SaaS */}
       <DashboardOverlay
         agents={agents}
         selectedAgentId={selectedAgentId}
