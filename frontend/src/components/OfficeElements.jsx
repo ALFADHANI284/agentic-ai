@@ -1,23 +1,36 @@
 import React from 'react'
-import { RoundedBox, Html } from '@react-three/drei'
+import { RoundedBox, Billboard, Text } from '@react-three/drei'
 
 /**
- * 6. Floating UI Badge (HTML Overlays)
- * Minimalist tech-modern pill shape, soft drop shadow, status dot, clean typography.
+ * 6. Floating UI Badge (Always-facing Billboard Pill Overlay)
+ * Minimalist tech modern, white pill shape, drop shadow, status dot, neat text.
+ * Pure WebGL Billboard - 100% immune to React 19 createRoot DOM unmount bugs!
  */
-export function FloatingBadge({ position, text, dotColor = 'bg-blue-500' }) {
+export function FloatingBadge({ position, text, dotColor = '#0284c7' }) {
+  const width = text.length * 0.11 + 0.55
+
   return (
-    <Html
-      center
-      distanceFactor={15}
-      position={position}
-      style={{ pointerEvents: 'none', userSelect: 'none' }}
-    >
-      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md shadow-lg border border-slate-200/90 text-slate-800 text-[10px] font-semibold tracking-tight whitespace-nowrap">
-        <span className={`w-2 h-2 rounded-full ${dotColor} shadow-sm animate-pulse`} />
-        <span>{text}</span>
-      </div>
-    </Html>
+    <Billboard position={position} follow={true}>
+      {/* White Pill Background */}
+      <RoundedBox args={[width, 0.36, 0.03]} radius={0.16} smoothness={4}>
+        <meshStandardMaterial color="#ffffff" roughness={0.2} metalness={0.05} />
+      </RoundedBox>
+      {/* Glowing Status Dot */}
+      <mesh position={[-width / 2 + 0.2, 0, 0.025]}>
+        <sphereGeometry args={[0.04, 16, 16]} />
+        <meshStandardMaterial color={dotColor} emissive={dotColor} emissiveIntensity={2.0} />
+      </mesh>
+      {/* Text Label */}
+      <Text
+        position={[0.08, 0, 0.025]}
+        fontSize={0.13}
+        color="#0f172a"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {text}
+      </Text>
+    </Billboard>
   )
 }
 
@@ -55,11 +68,7 @@ export function DioramaRoom() {
         />
       </RoundedBox>
 
-      {/* Permukaan Halus Lantai dengan Garis Grid Minimalis */}
-      <mesh receiveShadow position={[0, 0.18, 0]}>
-        <planeGeometry args={[17.6, 13.6]} />
-        <meshStandardMaterial color="#ffffff" roughness={0.1} metalness={0.02} />
-      </mesh>
+      {/* Garis Grid Minimalis di Atas Slab Lantai */}
       <gridHelper args={[17, 17, '#e2e8f0', '#f1f5f9']} position={[0, 0.185, 0]} />
 
       {/* Dinding Belakang Putih Minimalis */}
@@ -269,7 +278,7 @@ export function ModernDeskWorkstation({ position = [-4.0, 0.18, 0.5], isTyping =
       <FloatingBadge
         position={[0, 2.5, -0.2]}
         text="Desk 01 • Active Compute"
-        dotColor="bg-blue-500"
+        dotColor="#0284c7"
       />
     </group>
   )
@@ -341,7 +350,7 @@ export function VaultSafe({ position = [-6.2, 0.18, -4.5] }) {
       <FloatingBadge
         position={[0, 3.5, 0]}
         text="Vault • Secure Storage"
-        dotColor="bg-emerald-500"
+        dotColor="#10b981"
       />
     </group>
   )
@@ -417,7 +426,7 @@ export function KanbanWall({ position = [4.2, 0.18, -4.5] }) {
       <FloatingBadge
         position={[0, 3.8, 0]}
         text="Kanban Wall • 12 Active"
-        dotColor="bg-blue-500"
+        dotColor="#0284c7"
       />
     </group>
   )
@@ -481,7 +490,7 @@ export function SecurityTurnstile({ position = [0.8, 0.18, 2.8] }) {
       <FloatingBadge
         position={[0, 1.85, 0]}
         text="Security Gate • Access Control"
-        dotColor="bg-emerald-500"
+        dotColor="#10b981"
       />
     </group>
   )

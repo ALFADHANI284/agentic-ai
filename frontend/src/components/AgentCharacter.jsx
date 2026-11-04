@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
+import { Billboard, RoundedBox, Text } from '@react-three/drei'
 import * as THREE from 'three'
 
 /**
@@ -11,7 +11,7 @@ import * as THREE from 'three'
  * - Tangan dan kaki mini silinder sederhana.
  * - Animasi: Animasi idle mengapung/bernapas naik-turun halus menggunakan hook useFrame.
  *   Jika isTyping, posisikan robot sedang duduk mengetik di depan monitor.
- * - 6. Floating UI Badge (<Html center distanceFactor={15}>) di atas kepala robot.
+ * - 6. Floating UI Badge (Billboard Pill Shape) di atas kepala robot.
  */
 export function RobotAgent({
   color = '#0284c7',
@@ -92,37 +92,30 @@ export function RobotAgent({
     }
   })
 
+  const badgeText = isTyping ? `${label} • Typing` : `${label} • ${status}`
+  const badgeWidth = badgeText.length * 0.11 + 0.55
+
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
-      {/* 6. Floating UI Badge (<Html center distanceFactor={15}>) */}
-      <Html
-        center
-        distanceFactor={15}
-        position={[0, 1.4, 0]}
-        style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 backdrop-blur-md shadow-md border border-slate-200 text-slate-800 text-[10px] font-semibold tracking-tight whitespace-nowrap">
-            <span
-              className="w-2 h-2 rounded-full shadow-sm animate-pulse"
-              style={{ backgroundColor: color }}
-            />
-            <span className="font-bold">{label}</span>
-            {isTyping ? (
-              <span className="text-[9px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded-full border border-blue-200">
-                Typing...
-              </span>
-            ) : (
-              <span className="text-[9px] font-normal text-slate-400">
-                • {status}
-              </span>
-            )}
-          </div>
-          {/* Ekor penunjuk badge */}
-          <div className="w-1.5 h-1.5 bg-white rotate-45 border-r border-b border-slate-200 -mt-0.5" />
-        </div>
-      </Html>
-
+      {/* 6. Floating UI Badge (Billboard Pill Shape) */}
+      <Billboard position={[0, 1.45, 0]} follow={true}>
+        <RoundedBox args={[badgeWidth, 0.34, 0.03]} radius={0.15} smoothness={3}>
+          <meshStandardMaterial color="#ffffff" roughness={0.2} metalness={0.05} />
+        </RoundedBox>
+        <mesh position={[-badgeWidth / 2 + 0.2, 0, 0.025]}>
+          <sphereGeometry args={[0.04, 16, 16]} />
+          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={2.0} />
+        </mesh>
+        <Text
+          position={[0.08, 0, 0.025]}
+          fontSize={0.12}
+          color="#0f172a"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {badgeText}
+        </Text>
+      </Billboard>
       {/* Cincin Seleksi Bercahaya di Lantai */}
       {isSelected && (
         <group ref={haloRef} position={[0, 0.02, 0]}>

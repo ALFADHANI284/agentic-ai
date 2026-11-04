@@ -1,7 +1,6 @@
 import React from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, ContactShadows } from '@react-three/drei'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { 
   DioramaRoom, 
   ModernDeskWorkstation, 
@@ -13,7 +12,6 @@ import {
 import { RobotAgent } from './AgentCharacter'
 
 export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
-  // Ambil state dinamis jika ada dari props App, atau default
   const blueAgent = agents?.['blue-agent'] || { isTyping: true, statusText: 'Active Compute' }
   const purpleAgent = agents?.['purple-agent'] || { isTyping: false, statusText: 'Task Manager' }
   const orangeAgent = agents?.['orange-agent'] || { isTyping: false, statusText: 'Vault Storage' }
@@ -25,8 +23,8 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
         shadows
         orthographic
         camera={{
-          position: [24, 22, 24],
-          zoom: 38,
+          position: [28, 22, 24],
+          zoom: 32,
           near: 0.1,
           far: 500,
         }}
@@ -38,16 +36,16 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
           minPolarAngle={Math.PI / 6}
           minZoom={18}
           maxZoom={90}
-          target={[0, 1.0, 0]}
+          target={[1.0, 0.8, -0.2]}
         />
 
         {/* Studio Lighting Bersih & Alami */}
-        <ambientLight intensity={1.3} color="#ffffff" />
+        <ambientLight intensity={1.4} color="#ffffff" />
         
         {/* Lampu Utama Matahari / Keylight */}
         <directionalLight
-          position={[18, 30, 20]}
-          intensity={1.9}
+          position={[18, 32, 22]}
+          intensity={2.0}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
@@ -61,8 +59,8 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
         />
 
         {/* Lampu Fill Lembut Studio */}
-        <pointLight position={[-8, 8, 8]} intensity={0.5} color="#e0f2fe" />
-        <pointLight position={[8, 8, -6]} intensity={0.4} color="#f0f9ff" />
+        <pointLight position={[-8, 8, 8]} intensity={0.6} color="#e0f2fe" />
+        <pointLight position={[8, 8, -6]} intensity={0.5} color="#f0f9ff" />
 
         {/* 3. Komponen Ruangan Diorama (Isometric Office):
             - Lantai slab tebal putih glossy dengan list bawah kayu/cokelat.
@@ -83,24 +81,24 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
             + 6. Floating Badge "Desk 01 • Active Compute"
         */}
         <ModernDeskWorkstation
-          position={[-4.0, 0.18, 0.5]}
+          position={[-2.8, 0.18, 0.8]}
           isTyping={blueAgent.isTyping ?? true}
         />
 
         {/* 4. Brankas (Vault) Baja Silver Tebal dengan Pintu Semi-Terbuka
             + 6. Floating Badge "Vault • Secure Storage"
         */}
-        <VaultSafe position={[-6.2, 0.18, -4.5]} />
+        <VaultSafe position={[-5.8, 0.18, -4.2]} />
 
         {/* 4. Papan Kanban Kaca Melayang dengan Kolom (Backlog, In Progress, Review, Done) & Kartu Tugas
             + 6. Floating Badge "Kanban Wall • 12 Active"
         */}
-        <KanbanWall position={[4.2, 0.18, -4.5]} />
+        <KanbanWall position={[3.8, 0.18, -4.2]} />
 
         {/* 3. Turnstile Security Gate Stainless Steel di Dekat Pintu Masuk
             + 6. Floating Badge "Security Gate • Access Control"
         */}
-        <SecurityTurnstile position={[0.8, 0.18, 2.8]} />
+        <SecurityTurnstile position={[1.4, 0.18, 2.8]} />
 
         {/* 4. Tanaman Hias Pot Kecil di Sudut Lantai */}
         <PottedPlant position={[7.5, 0.18, -5.5]} scale={1.1} />
@@ -118,7 +116,7 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
         {/* 1. Robot Biru: Duduk mengetik di meja kerja (Active Compute) */}
         <RobotAgent
           color="#0284c7"
-          position={[-4.0, 0.18, 1.45]}
+          position={[-2.8, 0.18, 1.75]}
           rotation={[0, Math.PI, 0]}
           isTyping={blueAgent.isTyping ?? true}
           label="Robot Biru"
@@ -129,7 +127,7 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
         {/* 2. Robot Oranye: Berdiri di dekat Brankas baja (Vault Storage) */}
         <RobotAgent
           color="#ea580c"
-          position={[-4.2, 0.18, -3.8]}
+          position={[-3.8, 0.18, -3.5]}
           rotation={[0, Math.PI / 4, 0]}
           isTyping={false}
           label="Robot Oranye"
@@ -140,7 +138,7 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
         {/* 3. Robot Hijau: Berjalan di area tengah dekat gate */}
         <RobotAgent
           color="#16a34a"
-          position={[1.8, 0.18, 2.2]}
+          position={[2.4, 0.18, 2.2]}
           rotation={[0, -Math.PI / 3, 0]}
           isTyping={false}
           label="Robot Hijau"
@@ -151,23 +149,13 @@ export function OfficeScene({ agents, selectedAgentId, onSelectAgent }) {
         {/* 4. Robot Ungu: Berdiri menghadap papan Kanban (Task Manager) */}
         <RobotAgent
           color="#9333ea"
-          position={[4.2, 0.18, -2.8]}
+          position={[3.8, 0.18, -2.6]}
           rotation={[0, Math.PI, 0]}
           isTyping={purpleAgent.isTyping ?? false}
           label="Robot Ungu"
           status={purpleAgent.statusText || 'Task Manager'}
           isSelected={selectedAgentId === 'purple-agent'}
         />
-
-        {/* Post-processing Bloom untuk Pendaran Mata Cyan & Layar Monitor */}
-        <EffectComposer multisampling={4}>
-          <Bloom
-            luminanceThreshold={0.8}
-            luminanceSmoothing={0.9}
-            intensity={0.65}
-            radius={0.4}
-          />
-        </EffectComposer>
       </Canvas>
     </div>
   )
