@@ -1,14 +1,17 @@
-﻿import csv
+import csv
 import json
 import os
+import time
+from datetime import datetime
+from typing import Dict, Any, List, Optional
 import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-app = FastAPI(title="Agentic Sales Hub Core API", version="1.0.0")
+app = FastAPI(title="Agentic Sales Hub Core API - MSI Cubi NUC", version="1.1.0")
 
-# Izinkan CORS agar Virtual Office milik Alfa bisa mengakses API secara mulus
+# Izinkan CORS agar Virtual Office dapat mengakses API secara mulus
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,36 +20,164 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-WORKSPACE = "workspace"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+WORKSPACE = os.path.join(BASE_DIR, "workspace")
+CONFIG_DIR = os.path.join(BASE_DIR, "config")
+
 KATALOG_FILE = os.path.join(WORKSPACE, "katalog_produk.csv")
 STOK_FILE = os.path.join(WORKSPACE, "stok_cabang.csv")
 BUNDLING_FILE = os.path.join(WORKSPACE, "aturan_bundling.json")
 LEADS_FILE = os.path.join(WORKSPACE, "leads_mentah.csv")
+TEAM_FILE = os.path.join(CONFIG_DIR, "team_config.json")
+
+# In-memory activity logs
+activity_logs: List[Dict[str, Any]] = [
+    {
+        "id": "act-init",
+        "time": datetime.now().strftime("%H:%M:%S"),
+        "agent": "System",
+        "action": "MSI Cubi NUC AI+ B206 Core Hub Online",
+        "detail": "Katalog, stok cabang, dan model lokal qwen2.5:3b siap melayani pipeline."
+    }
+]
+
+def add_log(agent: str, action: str, detail: str = ""):
+    entry = {
+        "id": f"act-{int(time.time()*1000)}",
+        "time": datetime.now().strftime("%H:%M:%S"),
+        "agent": agent,
+        "action": action,
+        "detail": detail
+    }
+    activity_logs.insert(0, entry)
+    if len(activity_logs) > 50:
+        activity_logs.pop()
 
 def get_katalog_and_stock():
     katalog = {}
     if os.path.exists(KATALOG_FILE):
-        with open(KATALOG_FILE, mode="r", encoding="utf-8") as f:
+        with open(KATALOG_FILE, mode="r", encoding="utf-8-sig") as f:
             for r in csv.DictReader(f):
                 katalog[r["id_produk"]] = r
 
     stok = {}
     if os.path.exists(STOK_FILE):
-        with open(STOK_FILE, mode="r", encoding="utf-8") as f:
+        with open(STOK_FILE, mode="r", encoding="utf-8-sig") as f:
             for r in csv.DictReader(f):
                 pid = r.get("id_produk")
                 if pid:
                     stok.setdefault(pid, []).append(r)
     return katalog, stok
 
+def get_bundling_rules():
+    if os.path.exists(BUNDLING_FILE):
+        with open(BUNDLING_FILE, mode="r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def load_team_config():
+    default_config = {
+        "boss": {
+            "name": "Pak Alfa",
+            "role": "Chief Executive / Sales Director",
+            "color": "#f59e0b",
+            "badge": "DIRECTOR",
+            "station": "boss_desk"
+        },
+        "agents": {
+            "blue-agent": {
+                "id": "blue-agent",
+                "name": "Cubi Scout",
+                "role": "Compute & Stock Analyzer",
+                "color": "#0284c7",
+                "status": "Active Compute",
+                "station": "desk"
+            },
+            "purple-agent": {
+                "id": "purple-agent",
+                "name": "Cubi Scribe",
+                "role": "AI Pitch Drafter",
+                "color": "#9333ea",
+                "status": "Task Ready",
+                "station": "kanban"
+            },
+            "green-agent": {
+                "id": "green-agent",
+                "name": "Cubi Gate",
+                "role": "Approval & Dispatch",
+                "color": "#16a34a",
+                "status": "Access Control",
+                "station": "gate"
+            },
+            "orange-agent": {
+                "id": "orange-agent",
+                "name": "Cubi Vault",
+                "role": "Data & Deal Archivist",
+                "color": "#ea580c",
+                "status": "Vault Storage",
+                "station": "vault"
+            }
+        }
+    }
+    if os.path.exists(TEAM_FILE):
+        try:
+            with open(TEAM_FILE, mode="r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return default_config
+    return default_config
+
+def save_team_config(config: dict):
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    with open(TEAM_FILE, mode="w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2, ensure_ascii=False)
+
 @app.get("/api/v1/system/health")
 def health_check():
+    katalog, _ = get_katalog_and_stock()
+    total_leads = 0
+    dispatched_leads = 0
+    if os.path.exists(LEADS_FILE):
+        with open(LEADS_FILE, mode="r", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                total_leads += 1
+                if row.get("status_kontak") in ["dispatched", "approved"]:
+                    dispatched_leads += 1
+
     return {
         "status": "online",
         "appliance": "MSI Cubi NUC AI+ B206 Ready",
         "local_llm": "qwen2.5:3b",
-        "mode": "Local-First Hybrid"
+        "mode": "Local-First Hybrid",
+        "katalog_count": len(katalog),
+        "total_leads": total_leads,
+        "dispatched_leads": dispatched_leads,
+        "timestamp": datetime.now().isoformat()
     }
+
+@app.get("/api/v1/team/config")
+def get_team_config_endpoint():
+    return load_team_config()
+
+class TeamConfigUpdate(BaseModel):
+    boss: Optional[Dict[str, Any]] = None
+    agents: Optional[Dict[str, Any]] = None
+
+@app.post("/api/v1/team/config")
+def update_team_config_endpoint(payload: TeamConfigUpdate):
+    current = load_team_config()
+    if payload.boss:
+        current["boss"].update(payload.boss)
+    if payload.agents:
+        for k, v in payload.agents.items():
+            if k in current["agents"]:
+                current["agents"][k].update(v)
+            else:
+                current["agents"][k] = v
+    save_team_config(current)
+    boss_name = current.get("boss", {}).get("name", "Bos")
+    add_log(boss_name, "Memperbarui Konfigurasi Tim & Kantor", "Nama dan peran tim berhasil disinkronkan.")
+    return {"status": "success", "config": current}
 
 @app.get("/api/v1/leads/queue")
 def get_leads_queue():
@@ -54,14 +185,83 @@ def get_leads_queue():
         return {"total": 0, "leads": []}
     
     leads = []
-    with open(LEADS_FILE, mode="r", encoding="utf-8") as f:
+    with open(LEADS_FILE, mode="r", encoding="utf-8-sig") as f:
         for row in csv.DictReader(f):
-            # Lead scoring deterministik berdasarkan budget DP
-            dp = int(row.get("budget_dp", 0))
+            dp_raw = row.get("budget_dp", "0")
+            try:
+                dp = int(dp_raw)
+            except ValueError:
+                dp = 0
             score = "Hot" if dp >= 3500000 else ("Warm" if dp >= 2000000 else "Cold")
-            row["score_priority"] = score
-            leads.append(row)
+            
+            lead_id = row.get("id_lead") or row.get("\ufeffid_lead", "")
+            nama_val = row.get("nama_prospek") or row.get("nama", "Konsumen")
+            minat_val = row.get("minat_kebutuhan") or row.get("minat", "")
+
+            # Normalisasi field nama & minat agar kompatibel
+            lead_norm = {
+                "id_lead": lead_id,
+                "nama": nama_val,
+                "nama_prospek": nama_val,
+                "nomor_wa": row.get("nomor_wa", "6281234567890"),
+                "minat": minat_val,
+                "minat_kebutuhan": minat_val,
+                "budget_dp": str(dp),
+                "domisili": row.get("domisili", "Banyumas"),
+                "status_kontak": row.get("status_kontak", "pending"),
+                "score_priority": score
+            }
+            leads.append(lead_norm)
+            
     return {"total": len(leads), "leads": leads}
+
+class NewLeadRequest(BaseModel):
+    nama: str
+    nomor_wa: str
+    minat: str
+    budget_dp: int
+    domisili: str
+
+@app.post("/api/v1/leads/create")
+def create_lead(req: NewLeadRequest):
+    next_id = "LD-001"
+    existing_rows = []
+    if os.path.exists(LEADS_FILE):
+        with open(LEADS_FILE, mode="r", encoding="utf-8-sig") as f:
+            existing_rows = list(csv.DictReader(f))
+            if existing_rows:
+                nums = []
+                for r in existing_rows:
+                    lid = r.get("id_lead") or r.get("\ufeffid_lead", "")
+                    if lid.startswith("LD-"):
+                        try:
+                            nums.append(int(lid.replace("LD-", "")))
+                        except ValueError:
+                            pass
+                if nums:
+                    next_id = f"LD-{max(nums) + 1:03d}"
+
+    new_row = {
+        "id_lead": next_id,
+        "nama_prospek": req.nama,
+        "nomor_wa": req.nomor_wa,
+        "minat_kebutuhan": req.minat,
+        "budget_dp": str(req.budget_dp),
+        "domisili": req.domisili,
+        "status_kontak": "pending"
+    }
+
+    fieldnames = ["id_lead", "nama_prospek", "nomor_wa", "minat_kebutuhan", "budget_dp", "domisili", "status_kontak"]
+    
+    file_exists = os.path.exists(LEADS_FILE)
+    with open(LEADS_FILE, mode="a", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        if not file_exists or os.path.getsize(LEADS_FILE) == 0:
+            writer.writeheader()
+        writer.writerow(new_row)
+
+    add_log("System", f"Lead Baru Terdaftar: {req.nama} ({next_id})", f"Minat: {req.minat}, Domisili: {req.domisili}")
+    return {"status": "created", "lead": new_row}
 
 class PitchRequest(BaseModel):
     id_lead: str
@@ -72,25 +272,50 @@ class PitchRequest(BaseModel):
 @app.post("/api/v1/leads/generate-pitch")
 def generate_pitch(req: PitchRequest):
     katalog, stok = get_katalog_and_stock()
+    bundling_rules = get_bundling_rules()
     
-    # Matching produk relevan
+    # 1. Matching unit motor
     target_unit = "Beat Street"
+    target_pid = "MTR-01"
+    minat_words = req.minat.lower().split()
+    
     for pid, item in katalog.items():
-        if any(w in item["segmen_kebutuhan"].lower() for w in req.minat.lower().split()):
-            target_unit = item["nama_barang"]
+        if item.get("kategori", "").lower().startswith("motor"):
+            segmen = item.get("segmen_kebutuhan", "").lower()
+            if any(w in segmen for w in minat_words):
+                target_unit = item["nama_barang"]
+                target_pid = pid
+                break
+
+    # 2. Periksa Bundling Cross-Sell
+    bundling_info = bundling_rules.get(target_pid, {})
+    bonus_items = []
+    for bonus_id in bundling_info.get("cross_sell", []):
+        if bonus_id in katalog:
+            bonus_items.append(katalog[bonus_id]["nama_barang"])
+    
+    bundling_text = ", ".join(bonus_items) if bonus_items else "Helm Eksklusif & Garansi Resmi"
+
+    # 3. Periksa ketersediaan stok di cabang domisili
+    stok_list = stok.get(target_pid, [])
+    stok_status = "Ready di cabang utama"
+    for s in stok_list:
+        if s.get("cabang", "").lower() in req.domisili.lower() or req.domisili.lower() in s.get("cabang", "").lower():
+            stok_status = f"Ready ({s.get('stok_ready', 1)} unit) di {s.get('cabang')}"
             break
 
     prompt = f"""
-Anda adalah Sales Representative ramah dan profesional.
+Anda adalah Sales Representative ramah dan profesional di dealer resmi Astra Motor.
 Buatkan 1 pesan draf WhatsApp pendek (maksimal 3 kalimat) untuk calon pembeli.
 Nama Calon Konsumen: {req.nama}
 Kebutuhan/Minat: {req.minat}
 Unit yang Pas & Ready: {target_unit}
-Domisili: {req.domisili}
+Bonus Bundling Spesial: {bundling_text}
+Domisili: {req.domisili} ({stok_status})
 
 Pesan harus:
-1. Menyapa secara ramah dan personal.
-2. Menginfokan bahwa unit {target_unit} sedang ready di cabang terdekat dengan promo potongan DP/diskon menarik.
+1. Menyapa secara ramah dan santun personal.
+2. Menginfokan bahwa {target_unit} sedang ready di {req.domisili} dengan paket bundling {bundling_text} + diskon DP menarik.
 3. Memberikan Call-To-Action santai untuk konfirmasi konsultasi atau pembuatan simulasi SPK.
 """
     payload = {
@@ -100,15 +325,28 @@ Pesan harus:
         "temperature": 0.3
     }
     
+    pitch_text = ""
     try:
-        res = requests.post("http://localhost:11434/api/generate", json=payload, timeout=40)
-        pitch_text = res.json().get("response", "").strip()
+        res = requests.post("http://localhost:11434/api/generate", json=payload, timeout=2.0)
+        if res.status_code == 200:
+            pitch_text = res.json().get("response", "").strip()
     except Exception:
-        pitch_text = f"Halo Kak {req.nama}, kami lihat Kakak sedang butuh unit {target_unit}. Kebetulan unitnya ready di cabang {req.domisili} dan sedang ada promo diskon DP spesial hari ini. Apakah berkenan kami kirimkan simulasi rincian angsurannya?"
+        pass
+
+    if not pitch_text:
+        pitch_text = (
+            f"Halo Kak {req.nama}, salam hangat dari Astra Motor! Kami perhatikan Kakak sedang mencari kendaraan untuk {req.minat}. "
+            f"Kabar baiknya, unit {target_unit} sedang ready di cabang {req.domisili} lengkap dengan promo bundling {bundling_text} serta diskon DP spesial hari ini. "
+            f"Apakah berkenan kami kirimkan rincian simulasi angsuran dan jadwal test drive gratisnya?"
+        )
+
+    add_log("Cubi Scribe", f"Draf Pitch Dibuat untuk {req.nama}", f"Unit: {target_unit} • {stok_status}")
 
     return {
         "id_lead": req.id_lead,
         "unit_rekomendasi": target_unit,
+        "bundling_promo": bundling_text,
+        "stok_info": stok_status,
         "draft_pitch": pitch_text,
         "approval_required": True
     }
@@ -120,7 +358,32 @@ class ApprovalRequest(BaseModel):
 
 @app.post("/api/v1/leads/approve-and-send")
 def approve_outreach(req: ApprovalRequest):
-    # Approval Gate: Menandai lead siap eksekusi
+    # Update status lead di CSV menjadi dispatched
+    if os.path.exists(LEADS_FILE):
+        rows = []
+        fieldnames = ["id_lead", "nama_prospek", "nomor_wa", "minat_kebutuhan", "budget_dp", "domisili", "status_kontak"]
+        with open(LEADS_FILE, mode="r", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            for r in reader:
+                lid = r.get("id_lead") or r.get("\ufeffid_lead", "")
+                row_dict = {
+                    "id_lead": lid,
+                    "nama_prospek": r.get("nama_prospek", ""),
+                    "nomor_wa": r.get("nomor_wa", ""),
+                    "minat_kebutuhan": r.get("minat_kebutuhan", ""),
+                    "budget_dp": r.get("budget_dp", "0"),
+                    "domisili": r.get("domisili", ""),
+                    "status_kontak": "dispatched" if lid == req.id_lead else r.get("status_kontak", "pending")
+                }
+                rows.append(row_dict)
+        
+        with open(LEADS_FILE, mode="w", encoding="utf-8", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+
+    add_log("Cubi Gate", f"Dispatched WA ke {req.nomor_wa} (Lead #{req.id_lead})", "Pesan sales disetujui Bos & dikirim via gateway.")
+    
     return {
         "status": "approved",
         "lead_id": req.id_lead,
@@ -128,3 +391,17 @@ def approve_outreach(req: ApprovalRequest):
         "dispatched_to_gateway": True,
         "notes": "Pesan berhasil masuk antrean pengiriman dengan delay anti-spam."
     }
+
+@app.get("/api/v1/system/activities")
+def get_activities():
+    return {"total": len(activity_logs), "activities": activity_logs}
+
+class ActivityCreateRequest(BaseModel):
+    agent: str
+    action: str
+    detail: Optional[str] = ""
+
+@app.post("/api/v1/system/activities")
+def post_activity(req: ActivityCreateRequest):
+    add_log(req.agent, req.action, req.detail or "")
+    return {"status": "ok"}

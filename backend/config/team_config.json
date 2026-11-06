@@ -1,0 +1,103 @@
+{
+  "boss": {
+    "name": "Pak Alfa",
+    "role": "Sales Director",
+    "color": "#f59e0b",
+    "badge": "DIRECTOR",
+    "station": "boss_desk"
+  },
+  "agents": {
+    "blue-agent": {
+      "id": "blue-agent",
+      "name": "Cubi Scout",
+      "role": "Compute & Stock Analyzer",
+      "color": "#0284c7",
+      "status": "Active Compute",
+      "station": "desk",
+      "pos": [
+        -2.8,
+        0.18,
+        1.65
+      ],
+      "targetPos": [
+        -2.8,
+        0.18,
+        1.65
+      ],
+      "rotationY": 3.141592653589793,
+      "isWalking": false,
+      "isTyping": true,
+      "isScanning": false,
+      "statusText": "Monitoring Stock & Catalog"
+    },
+    "purple-agent": {
+      "id": "purple-agent",
+      "name": "Cubi Scribe",
+      "role": "AI Pitch Drafter",
+      "color": "#9333ea",
+      "status": "Task Ready",
+      "station": "kanban",
+      "pos": [
+        4,
+        0.18,
+        -2.6
+      ],
+      "targetPos": [
+        4,
+        0.18,
+        -2.6
+      ],
+      "rotationY": 3.141592653589793,
+      "isWalking": false,
+      "isTyping": false,
+      "isScanning": false,
+      "statusText": "Sprint Task Ready"
+    },
+    "green-agent": {
+      "id": "green-agent",
+      "name": "Cubi Gate",
+      "role": "Approval & Dispatch",
+      "color": "#16a34a",
+      "status": "Access Control",
+      "station": "gate",
+      "pos": [
+        2,
+        0.18,
+        1.5
+      ],
+      "targetPos": [
+        2,
+        0.18,
+        1.5
+      ],
+      "rotationY": -1.0471975511965976,
+      "isWalking": false,
+      "isTyping": false,
+      "isScanning": false,
+      "statusText": "WhatsApp Gateway Standby"
+    },
+    "orange-agent": {
+      "id": "orange-agent",
+      "name": "Cubi Vault",
+      "role": "Data & Deal Archivist",
+      "color": "#ea580c",
+      "status": "Vault Storage",
+      "station": "vault",
+      "pos": [
+        -4.2,
+        0.18,
+        -3.8
+      ],
+      "targetPos": [
+        -4.2,
+        0.18,
+        -3.8
+      ],
+      "rotationY": 0.7853981633974483,
+      "isWalking": false,
+      "isTyping": false,
+      "isScanning": false,
+      "statusText": "Database & Inventory Synced"
+    }
+  }
+}
