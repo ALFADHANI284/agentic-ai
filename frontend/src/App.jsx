@@ -58,7 +58,6 @@ const DEFAULT_AGENTS = {
     personaId: 'sales-engineer',
     pos: STATIONS.workstation_desk,
     targetPos: STATIONS.workstation_desk,
-          rotationY: Math.PI,
     rotationY: Math.PI,
     isWalking: false,
     isTyping: true,
@@ -76,7 +75,6 @@ const DEFAULT_AGENTS = {
     personaId: 'sales-outbound-strategist',
     pos: STATIONS.kanban_board,
     targetPos: STATIONS.kanban_board,
-            rotationY: Math.PI,
     rotationY: Math.PI,
     isWalking: false,
     isTyping: false,
@@ -698,7 +696,7 @@ export default function App() {
 
       {/* 3. RUTE: VIRTUAL OFFICE 3D (Architectural Blueprint Canvas & Cyber HUD) */}
       {currentRoute === 'office' && (
-        <main className="w-screen h-screen relative bg-[#F8F5EC] overflow-hidden select-none font-mono">
+        <main className="w-screen h-screen relative bg-[#F8F5EC] overflow-hidden select-none">
           {/* Blueprint Canvas Grid Pattern */}
           <div className={`fixed inset-0 pointer-events-none z-0 bg-grid-pattern ${isPure3DMode ? "opacity-0" : "opacity-70"}`} aria-hidden="true" />
           {/* 3D Diorama Kantor Virtual Modern MSI Cubi NUC */}

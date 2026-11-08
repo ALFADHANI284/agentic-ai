@@ -264,7 +264,9 @@ export function TeamSetupModal({ isOpen, onClose, teamConfig, onSave }) {
           <div className="p-3 rounded-2xl border transition-all" style={{ backgroundColor: `${boss.color}0c`, borderColor: `${boss.color}35` }}>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-xl p-1 rounded-xl bg-white/80 border border-white/80 shadow-xs">{boss.emoji}</span>
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shadow-xs">
+                  <Crown className="w-5 h-5" />
+                </div>
                 <div>
                   <div className="font-bold text-slate-900 flex items-center gap-1.5">
                     <span>{boss.name}</span>
@@ -315,8 +317,10 @@ export function TeamSetupModal({ isOpen, onClose, teamConfig, onSave }) {
             {/* Cubi 1: Blue Scout */}
             <div className="p-3 rounded-2xl border transition-all" style={{ backgroundColor: `${scout.color}0c`, borderColor: `${scout.color}35` }}>
               <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base p-1 rounded-lg bg-white/80 border border-white/80">{scout.emoji}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                    <Cpu className="w-4 h-4" />
+                  </div>
                   <div className="truncate">
                     <span className="font-bold text-slate-800 block text-[11px] truncate">{scout.name}</span>
                     <span className="text-[9px] text-slate-500 block truncate">Station 01: Workstation Desk</span>
@@ -350,8 +354,10 @@ export function TeamSetupModal({ isOpen, onClose, teamConfig, onSave }) {
             {/* Cubi 2: Purple Scribe */}
             <div className="p-3 rounded-2xl border transition-all" style={{ backgroundColor: `${scribe.color}0c`, borderColor: `${scribe.color}35` }}>
               <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base p-1 rounded-lg bg-white/80 border border-white/80">{scribe.emoji}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                    <Terminal className="w-4 h-4" />
+                  </div>
                   <div className="truncate">
                     <span className="font-bold text-slate-800 block text-[11px] truncate">{scribe.name}</span>
                     <span className="text-[9px] text-slate-500 block truncate">Station 02: Kanban Wall (Drafter)</span>
@@ -385,8 +391,10 @@ export function TeamSetupModal({ isOpen, onClose, teamConfig, onSave }) {
             {/* Cubi 3: Green Gate */}
             <div className="p-3 rounded-2xl border transition-all" style={{ backgroundColor: `${gate.color}0c`, borderColor: `${gate.color}35` }}>
               <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base p-1 rounded-lg bg-white/80 border border-white/80">{gate.emoji}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                    <Send className="w-4 h-4" />
+                  </div>
                   <div className="truncate">
                     <span className="font-bold text-slate-800 block text-[11px] truncate">{gate.name}</span>
                     <span className="text-[9px] text-slate-500 block truncate">Station 03: Security Gate</span>
@@ -420,8 +428,10 @@ export function TeamSetupModal({ isOpen, onClose, teamConfig, onSave }) {
             {/* Cubi 4: Orange Vault */}
             <div className="p-3 rounded-2xl border transition-all" style={{ backgroundColor: `${vault.color}0c`, borderColor: `${vault.color}35` }}>
               <div className="flex items-center justify-between mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base p-1 rounded-lg bg-white/80 border border-white/80">{vault.emoji}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center shrink-0">
+                    <Database className="w-4 h-4" />
+                  </div>
                   <div className="truncate">
                     <span className="font-bold text-slate-800 block text-[11px] truncate">{vault.name}</span>
                     <span className="text-[9px] text-slate-500 block truncate">Station 04: Server Vault</span>
@@ -568,10 +578,10 @@ export function TeamSetupModal({ isOpen, onClose, teamConfig, onSave }) {
                   >
                     <div className="flex items-start gap-2.5">
                       <div
-                        className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-xs border border-white"
+                        className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-xs border border-white"
                         style={{ backgroundColor: `${agent.color}25` }}
                       >
-                        {agent.emoji}
+                        <Bot className="w-5 h-5" style={{ color: agent.color || '#192A56' }} />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">

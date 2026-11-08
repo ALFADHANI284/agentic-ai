@@ -204,7 +204,7 @@ export function OfficeScene({
   }
 
   return (
-    <div className="w-full h-full relative cursor-grab active:cursor-grabbing bg-[#F8F5EC]">
+    <div className="w-full h-full relative cursor-grab active:cursor-grabbing bg-gradient-to-br from-slate-200 via-slate-100 to-blue-50/70">
       <Canvas
         shadows
         orthographic

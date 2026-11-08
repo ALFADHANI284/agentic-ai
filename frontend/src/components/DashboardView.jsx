@@ -334,7 +334,7 @@ export function DashboardView({
       <main className="max-w-7xl mx-auto px-4 sm:px-8 pt-6 space-y-6">
         
         {/* Banner Status Komando */}
-        <div className="p-5 sm:p-6 bg-white border-2 border-[#192A56] shadow-[4px_4px_0px_0px_#192A56] relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="p-5 sm:p-6 bg-white border border-slate-200/90 rounded-2xl shadow-sm relative flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 bg-[#192A56] text-[#F8F5EC] flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
               <Activity className="w-6 h-6 text-[#F8F5EC]" />
@@ -359,7 +359,7 @@ export function DashboardView({
               onClick={onRunAutoPipeline}
               disabled={isGenerating || pendingLeads === 0}
               style={{ backgroundColor: '#FF5B00', color: '#0A0E1A' }}
-              className="flex-1 md:flex-initial px-5 py-2.5 hover:bg-[#E04F00] disabled:opacity-50 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer shadow-[3px_3px_0px_0px_#192A56] border-2 border-[#192A56]"
+              className="flex-1 md:flex-initial px-5 py-2.5 hover:bg-[#E04F00] disabled:opacity-50 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer rounded-xl shadow-xs"
             >
               <Play className="w-3.5 h-3.5 shrink-0" style={{ fill: '#0A0E1A', stroke: '#0A0E1A' }} />
               <span style={{ color: '#0A0E1A' }} className="font-extrabold tracking-wide">
@@ -380,7 +380,7 @@ export function DashboardView({
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 text-xs font-mono">
           
           {/* KPI 1 */}
-          <div className="p-4 bg-white border-2 border-[#192A56] shadow-[3px_3px_0px_0px_#192A56]">
+          <div className="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-xs">
             <div className="text-[10px] text-[#576574] font-bold uppercase tracking-wider">TOTAL ANTREAN PROSPEK</div>
             <div className="text-2xl sm:text-3xl font-extrabold text-[#192A56] mt-1">
               {totalLeads}
@@ -391,7 +391,7 @@ export function DashboardView({
           </div>
 
           {/* KPI 2 */}
-          <div className="p-4 bg-white border-2 border-[#192A56] shadow-[3px_3px_0px_0px_#192A56]">
+          <div className="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-xs">
             <div className="text-[10px] text-[#576574] font-bold uppercase tracking-wider">PROSPEK PRIORITAS (HOT)</div>
             <div className="text-2xl sm:text-3xl font-extrabold text-[#192A56] mt-1">
               {hotLeads}
@@ -402,7 +402,7 @@ export function DashboardView({
           </div>
 
           {/* KPI 3 */}
-          <div className="p-4 bg-white border-2 border-[#192A56] shadow-[3px_3px_0px_0px_#192A56]">
+          <div className="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-xs">
             <div className="text-[10px] text-[#576574] font-bold uppercase tracking-wider">DISETUJUI &amp; TERKIRIM</div>
             <div className="text-2xl sm:text-3xl font-extrabold text-emerald-700 mt-1">
               {dispatchedLeads}
@@ -414,7 +414,7 @@ export function DashboardView({
           </div>
 
           {/* KPI 4 */}
-          <div className="p-4 bg-white border-2 border-[#192A56] shadow-[3px_3px_0px_0px_#192A56]">
+          <div className="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-xs">
             <div className="text-[10px] text-[#576574] font-bold uppercase tracking-wider">LATENSI INFERENSI HARDWARE</div>
             <div className="text-2xl sm:text-3xl font-extrabold text-[#192A56] mt-1">
               &lt; 0.8s
@@ -428,7 +428,7 @@ export function DashboardView({
         {/* ========================================================================= */}
         {/* 2.5 TELEMETRI PENGGUNAAN TOKEN REALTIME // INFERENSI HARDWARE LOKAL       */}
         {/* ========================================================================= */}
-        <section className="p-5 sm:p-6 bg-[#F8F5EC] border-2 border-[#192A56] shadow-[4px_4px_0px_0px_#192A56] relative">
+        <section className="p-5 sm:p-6 bg-[#F8F5EC] border border-slate-200/90 rounded-2xl shadow-sm relative">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#192A56]/20 mb-4 gap-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#192A56] text-[#F8F5EC] flex items-center justify-center font-bold text-xs shadow-xs">
@@ -578,7 +578,7 @@ export function DashboardView({
             </div>
           </div>
         </section>
-        <section className="p-5 sm:p-6 bg-white border-2 border-[#192A56] shadow-[4px_4px_0px_0px_#192A56] relative">
+        <section className="p-5 sm:p-6 bg-white border border-slate-200/90 rounded-2xl shadow-sm relative">
           <div className="flex items-center justify-between pb-3 border-b border-[#192A56]/20 mb-5">
             <div className="flex items-center gap-2">
               <Cpu className="w-5 h-5 text-[#192A56]" />
@@ -795,7 +795,7 @@ export function DashboardView({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Kolom Kiri: Tabel Antrean Prospek (8 Kolom) */}
-          <div className="lg:col-span-8 p-5 sm:p-6 bg-white border-2 border-[#192A56] shadow-[4px_4px_0px_0px_#192A56] flex flex-col justify-between">
+          <div className="lg:col-span-8 p-5 sm:p-6 bg-white border border-slate-200/90 rounded-2xl shadow-sm flex flex-col justify-between">
             <div>
               {/* Table Header & Controls */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-[#192A56]/20 mb-4">
@@ -925,7 +925,7 @@ export function DashboardView({
           </div>
 
           {/* Kolom Kanan: Realtime Terminal Log Stream (4 Kolom) */}
-          <div className="lg:col-span-4 p-5 sm:p-6 bg-[#192A56] text-[#F8F5EC] font-mono text-xs shadow-[4px_4px_0px_0px_rgba(25,42,86,0.3)] flex flex-col justify-between border-2 border-[#192A56]">
+          <div className="lg:col-span-4 p-5 sm:p-6 bg-[#192A56] text-[#F8F5EC] font-mono text-xs rounded-2xl shadow-md flex flex-col justify-between border border-[#192A56]">
             <div>
               <div className="flex items-center justify-between pb-3 border-b border-white/20 mb-4">
                 <div className="flex items-center gap-2">
@@ -971,7 +971,7 @@ export function DashboardView({
         {/* ========================================================================= */}
         {/* 5. INTERACTIVE COMMAND PROMPT (Pusat Komando) */}
         {/* ========================================================================= */}
-        <section className="p-5 sm:p-6 bg-white border-2 border-[#192A56] shadow-[4px_4px_0px_0px_#192A56] relative">
+        <section className="p-5 sm:p-6 bg-white border border-slate-200/90 rounded-2xl shadow-sm relative">
           <div className="flex items-center justify-between pb-3 border-b border-[#192A56]/20 mb-4">
             <div className="flex items-center gap-2">
               <Command className="w-5 h-5 text-[#192A56]" />
@@ -1025,7 +1025,7 @@ export function DashboardView({
             </div>
 
             {/* Input Bar */}
-            <div className="flex items-center gap-2 bg-[#F8F5EC] border-2 border-[#192A56] p-2 focus-within:bg-white transition-all shadow-xs">
+            <div className="flex items-center gap-2 bg-[#F8F5EC] border border-slate-200 rounded-xl p-2 focus-within:bg-white transition-all shadow-xs">
               <span className="text-[#192A56] font-bold pl-2 shrink-0">{commandTarget} &gt;</span>
               <input
                 type="text"

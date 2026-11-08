@@ -62,28 +62,15 @@ html {
   color: #192A56;
 }
 
-/* Fluid root sizing matching labs.chaingpt.org */
-@media screen and (min-width: 1440px) {
-  html {
-    font-size: calc(16px + 6 * ((100vw - 1440px) / 720));
-  }
-}
-@media screen and (min-width: 320px) and (max-width: 1439px) {
-  html {
-    font-size: calc(14px + 2 * ((100vw - 320px) / 1000));
-  }
-}
-
 body {
   width: 100%;
   min-height: 100%;
   margin: 0;
   padding: 0;
   background-color: #F8F5EC;
-  font-family: "RobotoMono", monospace;
-  color: #1E3163;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #192A56;
   overflow-x: clip;
-  overflow-y: auto;
 }
 
 #root {
@@ -506,63 +493,36 @@ html, body {
 }
 
 /* ========================================================================= */
-/* 1. BULLETPROOF BUTTON & TEXT CONTRAST (Never Blends with Background)     */
+/* 1. BUTTON & ACCENT UTILITIES                                              */
 /* ========================================================================= */
-/* Dark Navy Buttons (#192A56) must ALWAYS have high-contrast Cream text (#F8F5EC) */
-button[class*="bg-[#192A56]"],
-a[class*="bg-[#192A56]"],
 .btn-navy {
-  background-color: #192A56 !important;
-  color: #F8F5EC !important;
+  background-color: #192A56;
+  color: #F8F5EC;
 }
-button[class*="bg-[#192A56]"] *,
-a[class*="bg-[#192A56]"] *,
-.btn-navy * {
-  color: #F8F5EC !important;
-}
-button[class*="bg-[#192A56]"] svg,
-a[class*="bg-[#192A56]"] svg,
-.btn-navy svg {
-  stroke: #F8F5EC !important;
+.btn-navy:hover {
+  background-color: #0E1A38;
 }
 
-/* Orange Accent Buttons (#FF5B00) must ALWAYS have dark text (#0A0E1A) */
-button[class*="bg-[#FF5B00]"],
-a[class*="bg-[#FF5B00]"],
 .btn-orange {
-  background-color: #FF5B00 !important;
-  color: #0A0E1A !important;
+  background-color: #FF5B00;
+  color: #0A0E1A;
 }
-button[class*="bg-[#FF5B00]"] *,
-a[class*="bg-[#FF5B00]"] *,
-.btn-orange * {
-  color: #0A0E1A !important;
-}
-button[class*="bg-[#FF5B00]"] svg,
-a[class*="bg-[#FF5B00]"] svg,
-.btn-orange svg {
-  stroke: #0A0E1A !important;
-  fill: #0A0E1A !important;
-}
-
-/* White/Cream Inactive Buttons must ALWAYS have Navy text (#192A56) */
-button[class*="bg-white"],
-button[class*="bg-[#F8F5EC]"] {
-  color: #192A56 !important;
+.btn-orange:hover {
+  background-color: #E04F00;
 }
 
 /* ========================================================================= */
 /* 2. CONTINUOUS UNBROKEN 4-COLUMN ARCHITECTURAL BLUEPRINT GRID (Top to Bottom) */
 /* ========================================================================= */
 .body-lines-wrap {
-  z-index: 35 !important;
-  pointer-events: none !important;
-  display: block !important;
-  position: fixed !important;
-  top: 0 !important;
-  bottom: 0 !important;
-  left: 2.75rem !important;
-  right: 2.75rem !important;
+  z-index: 10;
+  pointer-events: none;
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2.75rem;
+  right: 2.75rem;
 }
 
 @media screen and (min-width: 1440px) {

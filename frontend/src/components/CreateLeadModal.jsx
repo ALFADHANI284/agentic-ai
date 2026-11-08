@@ -41,27 +41,27 @@ export function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#192A56]/40 backdrop-blur-xs pointer-events-auto select-none font-mono">
-      <div className="bg-[#F8F5EC] border-2 border-[#192A56] max-w-md w-full p-6 shadow-[8px_8px_0px_0px_#192A56] relative animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs pointer-events-auto select-none">
+      <div className="bg-white rounded-2xl border border-slate-200/90 max-w-md w-full p-6 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#192A56]/20">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-[#192A56] text-[#F8F5EC] flex items-center justify-center">
-              <PlusCircle className="w-5 h-5" />
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#192A56] flex items-center justify-center shadow-xs">
+              <PlusCircle className="w-5 h-5 text-[#192A56]" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-[#192A56] uppercase tracking-wider" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              <h3 className="font-bold text-sm text-[#192A56]">
                 Tambah Prospek / Lead Baru
               </h3>
-              <p className="text-[11px] text-[#576574]">
-                Tersimpan di CSV lokal NUC & dianalisis agen
+              <p className="text-xs text-slate-500">
+                Tersimpan di database lokal & dianalisis agen
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 bg-white hover:bg-[#192A56] text-[#192A56] hover:text-[#F8F5EC] flex items-center justify-center transition cursor-pointer border border-[#192A56]/40"
+            className="w-8 h-8 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -69,27 +69,27 @@ export function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
 
         {/* Quick Sample Presets */}
         <div className="my-3 flex flex-wrap gap-1.5 items-center">
-          <span className="text-[10px] text-[#576574]">Preset:</span>
+          <span className="text-xs text-slate-500">Preset:</span>
           <button
             type="button"
             onClick={() => setPreset('Diana Putri', 'harian lincah hemat komuter santai', '3000000', 'Purwokerto Timur')}
-            className="text-[10px] bg-white hover:bg-[#192A56] hover:text-[#F8F5EC] text-[#192A56] px-2 py-0.5 border border-[#192A56]/30 transition cursor-pointer font-bold"
+            className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg transition cursor-pointer font-medium"
           >
             + Diana (Beat Street)
           </button>
           <button
             type="button"
             onClick={() => setPreset('Dimas Pratama', 'kenyamanan touring elegan jarak jauh', '6000000', 'Banyumas Kota')}
-            className="text-[10px] bg-white hover:bg-[#192A56] hover:text-[#F8F5EC] text-[#192A56] px-2 py-0.5 border border-[#192A56]/30 transition cursor-pointer font-bold"
+            className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded-lg transition cursor-pointer font-medium"
           >
             + Dimas (PCX 160)
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
           <div>
-            <label className="block text-[11px] font-bold text-[#192A56] mb-1 flex items-center gap-1">
-              <User className="w-3.5 h-3.5 text-[#192A56]" />
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-slate-500" />
               Nama Calon Konsumen
             </label>
             <input
@@ -98,14 +98,14 @@ export function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
               onChange={(e) => setNama(e.target.value)}
               placeholder="Contoh: Farhan Maulana"
               required
-              className="w-full bg-white border border-[#192A56]/30 px-3 py-2 text-[#192A56] text-xs focus:outline-none focus:border-[#192A56]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[#192A56] text-xs focus:outline-none focus:bg-white focus:border-[#192A56] transition"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="block text-[11px] font-bold text-[#192A56] mb-1 flex items-center gap-1">
-                <Phone className="w-3.5 h-3.5 text-[#192A56]" />
+              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-slate-500" />
                 Nomor WhatsApp
               </label>
               <input
@@ -114,12 +114,12 @@ export function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
                 onChange={(e) => setNomorWa(e.target.value)}
                 placeholder="6281234..."
                 required
-                className="w-full bg-white border border-[#192A56]/30 px-3 py-2 text-[#192A56] text-xs font-mono focus:outline-none focus:border-[#192A56]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[#192A56] text-xs font-mono focus:outline-none focus:bg-white focus:border-[#192A56] transition"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-bold text-[#192A56] mb-1 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-[#192A56]" />
+              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-slate-500" />
                 Domisili / Cabang
               </label>
               <input
@@ -128,14 +128,14 @@ export function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
                 onChange={(e) => setDomisili(e.target.value)}
                 placeholder="Purwokerto Timur"
                 required
-                className="w-full bg-white border border-[#192A56]/30 px-3 py-2 text-[#192A56] text-xs focus:outline-none focus:border-[#192A56]"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[#192A56] text-xs focus:outline-none focus:bg-white focus:border-[#192A56] transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#192A56] mb-1 flex items-center gap-1">
-              <PackageCheck className="w-3.5 h-3.5 text-[#192A56]" />
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+              <PackageCheck className="w-3.5 h-3.5 text-slate-500" />
               Kebutuhan / Minat Unit
             </label>
             <input
@@ -144,13 +144,13 @@ export function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
               onChange={(e) => setMinat(e.target.value)}
               placeholder="Contoh: motor gesit irit bensin untuk kuliah harian"
               required
-              className="w-full bg-white border border-[#192A56]/30 px-3 py-2 text-[#192A56] text-xs focus:outline-none focus:border-[#192A56]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[#192A56] text-xs focus:outline-none focus:bg-white focus:border-[#192A56] transition"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#192A56] mb-1 flex items-center gap-1">
-              <DollarSign className="w-3.5 h-3.5 text-[#192A56]" />
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+              <DollarSign className="w-3.5 h-3.5 text-slate-500" />
               Budget DP (Rupiah)
             </label>
             <input
@@ -160,24 +160,24 @@ export function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
               onChange={(e) => setBudgetDp(e.target.value)}
               placeholder="3500000"
               required
-              className="w-full bg-white border border-[#192A56]/30 px-3 py-2 text-[#192A56] text-xs font-mono focus:outline-none focus:border-[#192A56]"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[#192A56] text-xs font-mono focus:outline-none focus:bg-white focus:border-[#192A56] transition"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#192A56]/20">
+          <div className="flex items-center justify-end gap-2.5 pt-3.5 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-[#192A56]/30 bg-white hover:bg-[#F0ECE1] text-[#192A56] font-bold text-xs transition cursor-pointer"
+              className="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 bg-[#192A56] hover:bg-[#0E1A38] text-[#F8F5EC] font-bold flex items-center gap-1.5 shadow-[2px_2px_0px_0px_#192A56] transition cursor-pointer disabled:opacity-50 text-xs uppercase"
+              className="px-5 py-2 rounded-xl bg-[#192A56] hover:bg-[#0E1A38] text-white font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer disabled:opacity-50 text-xs"
             >
-              <Check className="w-4 h-4" />
+              <Check className="w-4 h-4 text-white" />
               <span>{isSubmitting ? 'Menyimpan...' : 'Tambahkan Lead'}</span>
             </button>
           </div>
