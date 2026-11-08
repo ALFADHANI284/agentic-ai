@@ -4,37 +4,18 @@ import { Billboard, RoundedBox, Text } from '@react-three/drei'
 import * as THREE from 'three'
 
 /**
- * CubiCharacter: Karakter Robot Mini bertema MSI Cubi NUC
- * - Bentuk: Mini Cube / Squircle halus (RoundedBox) berpenampilan tech-cute & konsisten.
- * - Desain Ikonik MSI Cubi NUC:
- *   - Bodi Mini PC Cubi NUC dengan sudut membulat elegan.
- *   - Cincin tombol power LED menyala di sudut atas (ciri khas MSI Cubi NUC).
- *   - Visor depan kaca hitam glossy melengkung dengan mata digital LED ekspresif.
- *   - Kisi ventilasi pendingin mini di samping dan belakang.
- *   - Tangan & kaki mini robotik dengan sendi metalik.
- * - Karakter Bos:
- *   - Mahkota emas eksekutif dengan permata ruby.
- *   - Dasi / medali emas eksekutif di dada.
- *   - Visor dengan mata digital amber bercahaya hangat.
- *   - Warna bodi Charcoal Slate elegan dengan aksen amber/emas.
- * - Karakter Reguler:
- *   - Cubi Scout (Biru): Antena sensor ganda & balok scanner holografik saat cek stok/vault.
- *   - Cubi Scribe (Ungu): Gerakan mengetik cepat & aura tablet AI drafting.
- *   - Cubi Gate (Hijau): Antena radio WhatsApp dengan suar pemancar hijau berkedip.
- *   - Cubi Vault (Oranye): Ransel dual storage cartridge NVMe data core.
- * - Animasi:
- *   - Idle: Bernapas & melayang halus (gentle floating).
- *   - Walking: Melangkah lucu bergoyang waddling.
- *   - Typing: Duduk mengetik di meja kerja.
- *   - Scanning: Menginspeksi dengan laser kerucut holografik bercahaya.
- *   - Celebrate: Melompat gembira dengan mata tersenyum saat deal disetujui.
- * - Floating Billboard Badge 3D: Menampilkan nama kustom & aksi real-time.
+ * CubiCharacter: Karakter Robot Maskot 3D AICREW yang Identik dengan Landing Page
+ * Menggunakan proporsi rounded monitor-head, face bezel warna aksen, digital glowing eyes,
+ * spherical neck joint, dan white ceramic chassis halus.
  */
 export function CubiCharacter({
   id = 'cubi-agent',
   name = 'Cubi Bot',
   role = 'Agent',
   color = '#0284c7',
+  emoji = '🤖',
+  vibe = '',
+  personaId = '',
   position = [0, 0, 0],
   targetPosition = null,
   rotationY = 0,
@@ -43,10 +24,12 @@ export function CubiCharacter({
   isWalking = false,
   isBoss = false,
   isSelected = false,
+  hideBadge = false,
   onClick,
 }) {
   const groupRef = useRef()
   const bodyRef = useRef()
+  const headRef = useRef()
   const leftArmRef = useRef()
   const rightArmRef = useRef()
   const leftLegRef = useRef()
@@ -54,496 +37,491 @@ export function CubiCharacter({
   const leftEyeRef = useRef()
   const rightEyeRef = useRef()
   const haloRef = useRef()
-  const powerLedRef = useRef()
   const scanBeamRef = useRef()
-  const radioWaveRef = useRef()
+
+  // Hash id untuk offset fase napas independen tiap karakter
+  const phaseOffset = useRef(
+    (id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) * 1.37) % (Math.PI * 2)
+  ).current
 
   const destPos = useRef(new THREE.Vector3(...(targetPosition || position)))
 
   useFrame((state) => {
     if (!groupRef.current) return
-    const t = state.clock.getElapsedTime()
+    const t = state.clock.getElapsedTime() + phaseOffset
 
-    // Update target jika berubah
+    // 1. Update Posisi Target
     if (targetPosition) {
       destPos.current.set(targetPosition[0], targetPosition[1], targetPosition[2])
     } else {
       destPos.current.set(position[0], position[1], position[2])
     }
 
-    // Hitung jarak ke target
     const distToTarget = groupRef.current.position.distanceTo(destPos.current)
-    const moving = distToTarget > 0.08 || isWalking
+    const isMovingToTarget = distToTarget > 0.12
+    const moving = isMovingToTarget
 
-    // Smooth lerp ke target posisi
-    groupRef.current.position.lerp(destPos.current, 0.08)
+    // 2. Perpindahan Halus & Rotasi (Menggunakan interpolasi sudut terpendek untuk mencegah glitch 360 derajat)
+    if (isMovingToTarget) {
+      groupRef.current.position.lerp(destPos.current, 0.065)
 
-    // Arah rotasi menghadap target saat bergerak
-    if (moving && distToTarget > 0.15) {
+      // Menghadap arah jalan saat bergerak
       const dirX = destPos.current.x - groupRef.current.position.x
       const dirZ = destPos.current.z - groupRef.current.position.z
-      const moveAngle = Math.atan2(dirX, dirZ)
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(
-        groupRef.current.rotation.y,
-        moveAngle,
-        0.14
-      )
+      if (Math.hypot(dirX, dirZ) > 0.08) {
+        const moveAngle = Math.atan2(dirX, dirZ)
+        let diff = (moveAngle - groupRef.current.rotation.y) % (Math.PI * 2)
+        if (diff < -Math.PI) diff += Math.PI * 2
+        if (diff > Math.PI) diff -= Math.PI * 2
+        groupRef.current.rotation.y += diff * 0.12
+      }
     } else {
-      // Rotasi normal saat diam
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(
-        groupRef.current.rotation.y,
-        rotationY,
-        0.1
-      )
+      // Tiba di tujuan: Kunci koordinat X & Z secara halus
+      groupRef.current.position.x = THREE.MathUtils.lerp(groupRef.current.position.x, destPos.current.x, 0.15)
+      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, destPos.current.z, 0.15)
+      
+      // Rotasi tenang menghadap sudut stasiun kerja tanpa putaran acak
+      let diff = (rotationY - groupRef.current.rotation.y) % (Math.PI * 2)
+      if (diff < -Math.PI) diff += Math.PI * 2
+      if (diff > Math.PI) diff -= Math.PI * 2
+      groupRef.current.rotation.y += diff * 0.08
     }
 
-    // Animasi Tubuh & Anggota Tubuh
+    // 3. Animasi Bodi, Kepala, Tangan, dan Kaki (Organik & Hidup)
     if (bodyRef.current) {
       if (moving) {
-        // Animasi Berjalan (Cute Cubi Waddling Walk)
-        const walkSpeed = 16
+        // Gerakan Melangkah Halus & Mantap (Kecepatan natural)
+        const walkSpeed = 7.5
         const step = Math.sin(t * walkSpeed)
-        bodyRef.current.position.y = 0.58 + Math.abs(step) * 0.06
-        bodyRef.current.rotation.z = Math.sin(t * (walkSpeed / 2)) * 0.08
-        bodyRef.current.rotation.x = 0.05
+        bodyRef.current.position.y = 0.52 + Math.abs(step) * 0.025
+        bodyRef.current.rotation.z = Math.sin(t * (walkSpeed / 2)) * 0.035
+        bodyRef.current.rotation.x = 0.045
 
         // Tangan mengayun seirama langkah
         if (leftArmRef.current && rightArmRef.current) {
-          leftArmRef.current.rotation.x = -Math.sin(t * walkSpeed) * 0.6
-          rightArmRef.current.rotation.x = Math.sin(t * walkSpeed) * 0.6
-          leftArmRef.current.position.z = 0
-          rightArmRef.current.position.z = 0
+          leftArmRef.current.position.set(-0.25, 0.04, 0)
+          rightArmRef.current.position.set(0.25, 0.04, 0)
+          leftArmRef.current.rotation.x = -Math.sin(t * walkSpeed) * 0.4
+          rightArmRef.current.rotation.x = Math.sin(t * walkSpeed) * 0.4
+          leftArmRef.current.rotation.z = 0.14
+          rightArmRef.current.rotation.z = -0.14
         }
 
         // Kaki melangkah bergantian
         if (leftLegRef.current && rightLegRef.current) {
-          leftLegRef.current.rotation.x = Math.sin(t * walkSpeed) * 0.65
-          rightLegRef.current.rotation.x = -Math.sin(t * walkSpeed) * 0.65
+          leftLegRef.current.rotation.x = Math.sin(t * walkSpeed) * 0.42
+          rightLegRef.current.rotation.x = -Math.sin(t * walkSpeed) * 0.42
+        }
+
+        if (headRef.current) {
+          headRef.current.rotation.x = 0.03
+          headRef.current.rotation.y = Math.sin(t * (walkSpeed / 2)) * 0.05
         }
       } else if (isTyping) {
-        // Posisi Duduk Mengetik di Depan Meja
-        bodyRef.current.position.y = 0.50 + Math.sin(t * 14) * 0.012
+        // Mengetik Cerdas Berirama: 3.5s mengetik, 1.2s membaca monitor
+        const typingCycle = (t * 1.5) % 5
+        const isTypingActive = typingCycle < 3.8
+
+        bodyRef.current.position.y = 0.47 + Math.sin(t * 2.0) * 0.005
         bodyRef.current.rotation.z = 0
         bodyRef.current.rotation.x = 0.06
 
-        // Tangan mengetik lincah di keyboard
         if (leftArmRef.current && rightArmRef.current) {
-          leftArmRef.current.rotation.x = -0.75 + Math.sin(t * 24) * 0.15
-          rightArmRef.current.rotation.x = -0.75 + Math.cos(t * 24) * 0.15
-          leftArmRef.current.position.z = 0.16 + Math.sin(t * 24) * 0.03
-          rightArmRef.current.position.z = 0.16 + Math.cos(t * 24) * 0.03
+          leftArmRef.current.position.set(-0.16, 0.02, 0.22)
+          rightArmRef.current.position.set(0.16, 0.02, 0.22)
+
+          if (isTypingActive) {
+            leftArmRef.current.rotation.x = -0.72 + Math.sin(t * 13) * 0.12
+            rightArmRef.current.rotation.x = -0.72 + Math.cos(t * 13) * 0.12
+          } else {
+            // Tangan istirahat sejenak di atas meja
+            leftArmRef.current.rotation.x = THREE.MathUtils.lerp(leftArmRef.current.rotation.x, -0.65, 0.1)
+            rightArmRef.current.rotation.x = THREE.MathUtils.lerp(rightArmRef.current.rotation.x, -0.65, 0.1)
+          }
+          leftArmRef.current.rotation.z = 0.12
+          rightArmRef.current.rotation.z = -0.12
         }
 
-        // Kaki rileks duduk
         if (leftLegRef.current && rightLegRef.current) {
-          leftLegRef.current.rotation.x = -Math.PI / 2.3
-          rightLegRef.current.rotation.x = -Math.PI / 2.3
+          leftLegRef.current.rotation.x = 0
+          rightLegRef.current.rotation.x = 0
+        }
+
+        if (headRef.current) {
+          if (isTypingActive) {
+            headRef.current.rotation.x = 0.12 + Math.sin(t * 2.5) * 0.02
+            headRef.current.rotation.y = Math.sin(t * 1.2) * 0.03
+          } else {
+            // Menatap layar lebih tinggi membaca kode/penawaran
+            headRef.current.rotation.x = 0.05
+            headRef.current.rotation.y = Math.sin(t * 0.8) * 0.06
+          }
         }
       } else if (isScanning) {
-        // Animasi Inspeksi / Scanning Vault
-        bodyRef.current.position.y = 0.62 + Math.sin(t * 3) * 0.03
-        bodyRef.current.rotation.x = 0.12
-        bodyRef.current.rotation.y = Math.sin(t * 2.5) * 0.28
+        // Mode Scanner Keamanan: Berdiri tegak, kepala menoleh teliti
+        bodyRef.current.position.y = 0.52 + Math.sin(t * 1.5) * 0.008
+        bodyRef.current.rotation.z = 0
+        bodyRef.current.rotation.x = 0
 
         if (leftArmRef.current && rightArmRef.current) {
-          leftArmRef.current.rotation.x = -0.85 + Math.sin(t * 4) * 0.12
-          rightArmRef.current.rotation.x = -0.65
+          leftArmRef.current.position.set(-0.25, 0.04, 0)
+          rightArmRef.current.position.set(0.25, 0.04, 0)
+          leftArmRef.current.rotation.x = 0.1
+          rightArmRef.current.rotation.x = 0.1
+          leftArmRef.current.rotation.z = 0.18
+          rightArmRef.current.rotation.z = -0.18
         }
 
-        // Kerucut scanner berdenyut
+        if (headRef.current) {
+          headRef.current.rotation.y = Math.sin(t * 2.2) * 0.35
+          headRef.current.rotation.x = 0.12
+        }
+
         if (scanBeamRef.current) {
-          scanBeamRef.current.material.opacity = 0.35 + Math.sin(t * 8) * 0.15
+          scanBeamRef.current.rotation.y = Math.sin(t * 3) * 0.2
         }
       } else {
-        // Animasi Idle: Floating & Bernapas Halus
-        const idleCycle = Math.sin(t * 2.8)
-        bodyRef.current.position.y = (isBoss ? 0.62 : 0.60) + idleCycle * 0.03
+        // Mode Tenang Idle: Napas organik & sesekali menoleh lembut
+        const idleBreathing = Math.sin(t * 1.8) * 0.012
+        bodyRef.current.position.y = 0.52 + idleBreathing
+        bodyRef.current.rotation.z = 0
         bodyRef.current.rotation.x = 0
-        bodyRef.current.rotation.z = Math.sin(t * 1.6) * 0.02
-        bodyRef.current.rotation.y = 0
 
-        // Tangan santai di samping bodi
         if (leftArmRef.current && rightArmRef.current) {
-          leftArmRef.current.rotation.x = THREE.MathUtils.lerp(leftArmRef.current.rotation.x, 0, 0.1)
-          rightArmRef.current.rotation.x = THREE.MathUtils.lerp(rightArmRef.current.rotation.x, 0, 0.1)
-          leftArmRef.current.position.z = 0
-          rightArmRef.current.position.z = 0
+          leftArmRef.current.position.set(-0.25, 0.04, 0)
+          rightArmRef.current.position.set(0.25, 0.04, 0)
+          leftArmRef.current.rotation.x = Math.sin(t * 1.6) * 0.04
+          rightArmRef.current.rotation.x = Math.sin(t * 1.6) * 0.04
+          leftArmRef.current.rotation.z = 0.16
+          rightArmRef.current.rotation.z = -0.16
         }
 
-        // Kaki tegak lurus
         if (leftLegRef.current && rightLegRef.current) {
-          leftLegRef.current.rotation.x = THREE.MathUtils.lerp(leftLegRef.current.rotation.x, 0, 0.1)
-          rightLegRef.current.rotation.x = THREE.MathUtils.lerp(rightLegRef.current.rotation.x, 0, 0.1)
+          leftLegRef.current.rotation.x = 0
+          rightLegRef.current.rotation.x = 0
         }
-      }
 
-      // Animasi Berkedip Digital (Blinking Eyes)
-      const blinkCycle = Math.sin(t * 1.8)
-      const isBlinking = blinkCycle > 0.96 && !isScanning
-      if (leftEyeRef.current && rightEyeRef.current) {
-        const eyeScaleY = isBlinking ? 0.15 : 1.0
-        leftEyeRef.current.scale.y = eyeScaleY
-        rightEyeRef.current.scale.y = eyeScaleY
-      }
-
-      // Breathing Power LED Ring (MSI Cubi NUC Signature)
-      if (powerLedRef.current) {
-        powerLedRef.current.material.emissiveIntensity = 2.0 + Math.sin(t * 3.5) * 0.8
-      }
-
-      // Gelombang radio suar gate
-      if (radioWaveRef.current) {
-        radioWaveRef.current.scale.setScalar(1 + (t % 1) * 0.8)
-        radioWaveRef.current.material.opacity = Math.max(0, 0.8 - (t % 1) * 0.8)
+        if (headRef.current) {
+          headRef.current.rotation.y = Math.sin(t * 0.6) * 0.14
+          headRef.current.rotation.x = Math.sin(t * 0.9) * 0.04
+        }
       }
     }
 
-    // Halo Seleksi di Lantai
+    // 4. Kedipan Mata Digital Halus
+    const blinkCycle = t % 4.5
+    const isBlinking = blinkCycle > 4.2 && blinkCycle < 4.38
+    const eyeScaleY = isBlinking ? 0.12 : 1.0
+
+    if (leftEyeRef.current && rightEyeRef.current) {
+      leftEyeRef.current.scale.y = eyeScaleY
+      rightEyeRef.current.scale.y = eyeScaleY
+    }
+
+    // 5. Cincin Seleksi Berputar Pelan
     if (haloRef.current) {
-      haloRef.current.scale.setScalar(1 + Math.sin(t * 4) * 0.07)
+      haloRef.current.rotation.y += 0.02
     }
   })
 
+  const accentColor = isBoss ? '#192A56' : color || '#0284c7'
+  const eyeColor = '#FFFFFF'
+  const showBadge = isSelected || isWalking || isScanning
+
   const badgeText = isWalking
-    ? `${name} • Berjalan...`
+    ? `${name} • Moving`
     : isTyping
-    ? `${name} • Mengetik Draf AI`
+    ? `${name} • Working`
     : isScanning
-    ? `${name} • Riset Stok Cabang`
+    ? `${name} • Scanning`
     : `${name} • ${role}`
-
-  const badgeWidth = Math.max(1.3, badgeText.length * 0.092 + 0.55)
-
-  // Bodi warna Bos: Charcoal Titanium dengan aksen Amber, agen lain sesuai warnanya
-  const primaryBodyColor = isBoss ? '#1e293b' : color
-  const eyeColor = isBoss ? '#fde047' : '#00f3ff'
-  const powerRingColor = isBoss ? '#f59e0b' : '#38bdf8'
 
   return (
     <group
       ref={groupRef}
       position={position}
+      scale={isBoss ? 1.4 : 1.25}
       onClick={(e) => {
         e.stopPropagation()
         if (onClick) onClick(id)
       }}
       cursor="pointer"
     >
-      {/* Floating Billboard Badge di Atas Kepala */}
-      <Billboard position={[0, isBoss ? 1.58 : 1.48, 0]} follow={true}>
-        <RoundedBox args={[badgeWidth, 0.32, 0.03]} radius={0.14} smoothness={4}>
-          <meshStandardMaterial color="#ffffff" roughness={0.18} metalness={0.05} />
-        </RoundedBox>
-        {/* Glowing Indicator Dot */}
-        <mesh position={[-badgeWidth / 2 + 0.18, 0, 0.025]}>
-          <sphereGeometry args={[0.04, 16, 16]} />
-          <meshStandardMaterial
-            color={isBoss ? '#f59e0b' : color}
-            emissive={isBoss ? '#f59e0b' : color}
-            emissiveIntensity={2.5}
-          />
-        </mesh>
-        {/* Label Teks */}
-        <Text
-          position={[0.08, 0, 0.025]}
-          fontSize={0.115}
-          color="#0f172a"
-          anchorX="center"
-          anchorY="middle"
-        >
-          {badgeText}
-        </Text>
-      </Billboard>
+      {/* Floating Blueprint Badge (Tampil Rapi Saat Terpilih / Aktif, Disembunyikan di Mode Pure Fullscreen) */}
+      {showBadge && !hideBadge && (
+        <Billboard position={[0, isBoss ? 1.55 : 1.45, 0]} follow={true}>
+          <RoundedBox args={[badgeText.length * 0.075 + 0.45, 0.26, 0.02]} radius={0.06} smoothness={3}>
+            <meshStandardMaterial color="#F8F5EC" roughness={0.15} />
+          </RoundedBox>
+          <mesh position={[-(badgeText.length * 0.075 + 0.45) / 2 + 0.12, 0, 0.015]}>
+            <sphereGeometry args={[0.03, 12, 12]} />
+            <meshStandardMaterial
+              color={accentColor}
+              emissive={accentColor}
+              emissiveIntensity={2.5}
+            />
+          </mesh>
+          <Text
+            position={[0.06, 0, 0.015]}
+            fontSize={0.10}
+            color="#192A56"
+            anchorX="center"
+            anchorY="middle"
+            fontFamily="monospace"
+          >
+            {badgeText}
+          </Text>
+        </Billboard>
+      )}
 
       {/* Cincin Seleksi Bercahaya di Lantai */}
       {isSelected && (
         <group ref={haloRef} position={[0, 0.02, 0]}>
           <mesh rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.55, 0.68, 36]} />
+            <ringGeometry args={[0.48, 0.58, 32]} />
             <meshStandardMaterial
-              color={isBoss ? '#f59e0b' : color}
-              emissive={isBoss ? '#f59e0b' : color}
-              emissiveIntensity={2.4}
+              color={accentColor}
+              emissive={accentColor}
+              emissiveIntensity={2.2}
               transparent
               opacity={0.85}
             />
           </mesh>
-          <pointLight position={[0, 0.25, 0]} intensity={1.2} distance={2.0} color={isBoss ? '#f59e0b' : color} />
+          <pointLight position={[0, 0.2, 0]} intensity={1.2} distance={1.8} color={accentColor} />
         </group>
       )}
 
       {/* Bayangan Kontak Halus di Lantai */}
-      <mesh position={[0, 0.015, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.38, 24]} />
-        <meshBasicMaterial color="#94a3b8" transparent opacity={0.35} />
+      <mesh position={[0, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.32, 24]} />
+        <meshBasicMaterial color="#192A56" transparent opacity={0.18} />
       </mesh>
 
-      {/* Bodi Utama Karakter Cubi Bot */}
-      <group ref={bodyRef} position={[0, 0.6, 0]}>
+      {/* Bodi Utama Karakter Robot Maskot AICREW */}
+      <group ref={bodyRef} position={[0, 0.52, 0]}>
         
-        {/* Mahkota Emas Mini Eksklusif untuk Bos Cubi */}
-        {isBoss && (
-          <group position={[0, 0.38, 0]}>
-            <mesh position={[0, 0.02, 0]}>
-              <cylinderGeometry args={[0.16, 0.14, 0.06, 16]} />
-              <meshStandardMaterial color="#fbbf24" metalness={0.85} roughness={0.18} />
-            </mesh>
-            {/* 4 Ujung Mahkota */}
-            {[-0.1, 0.1].map((x) =>
-              [-0.1, 0.1].map((z) => (
-                <mesh key={`${x}-${z}`} position={[x, 0.08, z]}>
-                  <coneGeometry args={[0.035, 0.09, 8]} />
-                  <meshStandardMaterial color="#f59e0b" metalness={0.9} roughness={0.15} />
-                </mesh>
-              ))
-            )}
-            {/* Permata Ruby Kecil di Mahkota */}
-            <mesh position={[0, 0.06, 0.15]}>
-              <sphereGeometry args={[0.028, 12, 12]} />
-              <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={2.5} />
-            </mesh>
-          </group>
-        )}
-
-        {/* Aksesoris Bos: Dasi / Medali Eksekutif di Dada */}
-        {isBoss && (
-          <group position={[0, -0.06, 0.27]}>
-            <mesh position={[0, 0, 0]}>
-              <coneGeometry args={[0.06, 0.13, 4]} rotation={[0, 0, Math.PI]} />
-              <meshStandardMaterial color="#f59e0b" metalness={0.9} roughness={0.15} />
-            </mesh>
-            <mesh position={[0, 0.06, 0]}>
-              <cylinderGeometry args={[0.035, 0.035, 0.02, 12]} rotation={[Math.PI / 2, 0, 0]} />
-              <meshStandardMaterial color="#fbbf24" metalness={0.9} />
-            </mesh>
-          </group>
-        )}
-
-        {/* Antena Sensor Ganda untuk Cubi Scout (Biru) */}
-        {!isBoss && id === 'blue-agent' && (
-          <group position={[0, 0.32, 0]}>
-            <mesh position={[-0.15, 0.07, 0]}>
-              <cylinderGeometry args={[0.015, 0.015, 0.14, 10]} />
-              <meshStandardMaterial color="#334155" metalness={0.8} />
-            </mesh>
-            <mesh position={[-0.15, 0.14, 0]}>
-              <sphereGeometry args={[0.032, 12, 12]} />
-              <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={3.0} />
-            </mesh>
-            <mesh position={[0.15, 0.07, 0]}>
-              <cylinderGeometry args={[0.015, 0.015, 0.14, 10]} />
-              <meshStandardMaterial color="#334155" metalness={0.8} />
-            </mesh>
-            <mesh position={[0.15, 0.14, 0]}>
-              <sphereGeometry args={[0.032, 12, 12]} />
-              <meshStandardMaterial color="#38bdf8" emissive="#38bdf8" emissiveIntensity={3.0} />
-            </mesh>
-          </group>
-        )}
-
-        {/* Antena Radio WhatsApp & Suar Pemancar untuk Cubi Gate (Hijau) */}
-        {!isBoss && id === 'green-agent' && (
-          <group position={[0, 0.32, 0]}>
-            <mesh position={[0, 0.09, 0]}>
-              <cylinderGeometry args={[0.015, 0.02, 0.18, 10]} />
-              <meshStandardMaterial color="#334155" metalness={0.8} />
-            </mesh>
-            <mesh position={[0, 0.18, 0]}>
-              <sphereGeometry args={[0.045, 16, 16]} />
-              <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={3.2} />
-            </mesh>
-            {/* Gelombang Denyut Pemancar */}
-            <mesh ref={radioWaveRef} position={[0, 0.18, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-              <ringGeometry args={[0.06, 0.08, 24]} />
-              <meshBasicMaterial color="#22c55e" transparent opacity={0.6} side={THREE.DoubleSide} />
-            </mesh>
-          </group>
-        )}
-
-        {/* AI Holographic Stylus di Pundak untuk Cubi Scribe (Ungu) */}
-        {!isBoss && id === 'purple-agent' && (
-          <group position={[0.22, 0.15, -0.15]} rotation={[0.2, 0, -0.3]}>
-            <mesh position={[0, 0.1, 0]}>
-              <cylinderGeometry args={[0.015, 0.01, 0.22, 12]} />
-              <meshStandardMaterial color="#a855f7" emissive="#a855f7" emissiveIntensity={1.8} />
-            </mesh>
-          </group>
-        )}
-
-        {/* Dual NVMe Storage Pods di Punggung untuk Cubi Vault (Oranye) */}
-        {!isBoss && id === 'orange-agent' && (
-          <group position={[0, 0.02, -0.28]}>
-            <mesh position={[-0.1, 0, 0]}>
-              <boxGeometry args={[0.09, 0.22, 0.06]} />
-              <meshStandardMaterial color="#334155" metalness={0.9} />
-            </mesh>
-            <mesh position={[0.1, 0, 0]}>
-              <boxGeometry args={[0.09, 0.22, 0.06]} />
-              <meshStandardMaterial color="#334155" metalness={0.9} />
-            </mesh>
-            <mesh position={[0, 0.08, 0.035]}>
-              <sphereGeometry args={[0.022, 10, 10]} />
-              <meshStandardMaterial color="#ea580c" emissive="#ea580c" emissiveIntensity={3.0} />
-            </mesh>
-          </group>
-        )}
-
-        {/* MSI Cubi NUC Glowing Power LED Ring di Sudut Depan Atas */}
-        <group position={[0.16, 0.28, 0.16]}>
-          <mesh ref={powerLedRef} rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.025, 0.045, 24]} />
-            <meshStandardMaterial
-              color={powerRingColor}
-              emissive={powerRingColor}
-              emissiveIntensity={2.5}
-            />
-          </mesh>
-        </group>
-
-        {/* Bodi Utama: Rounded Cube (Bentuk Ikonik MSI Cubi NUC yang Cute) */}
-        <RoundedBox
-          castShadow
-          receiveShadow
-          args={[0.58, 0.54, 0.52]}
-          radius={0.12}
-          smoothness={5}
-        >
-          <meshStandardMaterial
-            color={primaryBodyColor}
-            roughness={0.18}
-            metalness={isBoss ? 0.45 : 0.18}
-          />
-        </RoundedBox>
-
-        {/* Bevel Aksen List Titanium / Chrome di Bagian Bawah Bodi */}
-        <mesh position={[0, -0.23, 0]}>
-          <boxGeometry args={[0.54, 0.04, 0.48]} />
-          <meshStandardMaterial color="#0f172a" metalness={0.85} roughness={0.25} />
-        </mesh>
-
-        {/* Visor Layar Depan (Hitam Glossy) */}
-        <group position={[0, 0.04, 0.245]}>
-          <RoundedBox args={[0.44, 0.32, 0.04]} radius={0.06} smoothness={4}>
-            <meshStandardMaterial
-              color="#020617"
-              roughness={0.06}
-              metalness={0.92}
-            />
+        {/* ========================================================= */}
+        {/* 1. KEPALA MONITOR ROUNDED SQUIRCLE (Identik Landing Page) */}
+        {/* ========================================================= */}
+        <group ref={headRef} position={[0, 0.42, 0]}>
+          
+          {/* Casing Luar Putih Mulus */}
+          <RoundedBox
+            args={[0.68, 0.58, 0.52]}
+            radius={0.13}
+            smoothness={4}
+            castShadow
+          >
+            <meshStandardMaterial color="#FFFFFF" roughness={0.18} metalness={0.08} />
           </RoundedBox>
 
-          {/* Mata Digital LED Kiri */}
-          <mesh ref={leftEyeRef} position={[-0.10, 0.02, 0.025]}>
-            <capsuleGeometry args={[0.032, 0.06, 12, 16]} />
-            <meshStandardMaterial
-              color={eyeColor}
-              emissive={eyeColor}
-              emissiveIntensity={3.0}
-            />
-          </mesh>
-
-          {/* Mata Digital LED Kanan */}
-          <mesh ref={rightEyeRef} position={[0.10, 0.02, 0.025]}>
-            <capsuleGeometry args={[0.032, 0.06, 12, 16]} />
-            <meshStandardMaterial
-              color={eyeColor}
-              emissive={eyeColor}
-              emissiveIntensity={3.0}
-            />
-          </mesh>
-
-          {/* Senyum LED Digital Mini Halus */}
-          <mesh position={[0, -0.06, 0.025]} rotation={[0, 0, Math.PI]}>
-            <torusGeometry args={[0.04, 0.008, 8, 16, Math.PI]} />
-            <meshStandardMaterial
-              color={eyeColor}
-              emissive={eyeColor}
-              emissiveIntensity={2.5}
-            />
-          </mesh>
-        </group>
-
-        {/* Kerucut Laser Scanner Holografik saat Cubi Scout melakukan inspeksi stok */}
-        {isScanning && (
-          <group position={[0, 0, 0.32]} rotation={[0.45, 0, 0]}>
-            <mesh ref={scanBeamRef} position={[0, -0.65, 0.4]}>
-              <coneGeometry args={[0.5, 1.3, 24, 1, true]} />
-              <meshBasicMaterial
-                color="#38bdf8"
-                transparent
-                opacity={0.35}
-                side={THREE.DoubleSide}
-              />
-            </mesh>
-            <pointLight color="#38bdf8" intensity={2.2} distance={2.0} />
+          {/* Bezel Aksen Deep Navy / Warna Agen */}
+          <group position={[0, 0, 0.25]}>
+            <RoundedBox args={[0.56, 0.46, 0.03]} radius={0.09} smoothness={3}>
+              <meshStandardMaterial color={accentColor} roughness={0.25} metalness={0.2} />
+            </RoundedBox>
           </group>
-        )}
 
-        {/* Kisi Ventilasi Pendingin Belakang (MSI Cubi NUC Cooling Exhaust) */}
-        <group position={[0, 0.02, -0.265]}>
-          {[-0.08, -0.02, 0.04, 0.1].map((y, i) => (
-            <mesh key={i} position={[0, y, 0]}>
-              <boxGeometry args={[0.36, 0.02, 0.02]} />
-              <meshStandardMaterial color="#090d16" roughness={0.4} />
-            </mesh>
-          ))}
-          {/* Logo Cubi NUC Mini di Belakang */}
-          <mesh position={[0, -0.15, 0.005]}>
-            <boxGeometry args={[0.18, 0.05, 0.01]} />
-            <meshStandardMaterial color="#64748b" metalness={0.7} />
+          {/* Layar Kaca Hitam Mengkilap di Depan */}
+          <group position={[0, 0, 0.265]}>
+            <RoundedBox args={[0.50, 0.40, 0.02]} radius={0.07} smoothness={3}>
+              <meshStandardMaterial color="#0A0E1A" roughness={0.08} metalness={0.88} />
+            </RoundedBox>
+          </group>
+
+          {/* Mata LED Kapsul Digital Putih Kiri */}
+          <mesh ref={leftEyeRef} position={[-0.11, 0.025, 0.28]}>
+            <capsuleGeometry args={[0.026, 0.055, 10, 14]} />
+            <meshStandardMaterial color={eyeColor} emissive={eyeColor} emissiveIntensity={2.8} />
+          </mesh>
+
+          {/* Mata LED Kapsul Digital Putih Kanan */}
+          <mesh ref={rightEyeRef} position={[0.11, 0.025, 0.28]}>
+            <capsuleGeometry args={[0.026, 0.055, 10, 14]} />
+            <meshStandardMaterial color={eyeColor} emissive={eyeColor} emissiveIntensity={2.8} />
+          </mesh>
+
+          {/* Dial / Antena Samping Membulat */}
+          <mesh position={[-0.35, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.055, 0.055, 0.05, 16]} />
+            <meshStandardMaterial color={accentColor} roughness={0.25} metalness={0.3} />
+          </mesh>
+          <mesh position={[0.35, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.055, 0.055, 0.05, 16]} />
+            <meshStandardMaterial color={accentColor} roughness={0.25} metalness={0.3} />
+          </mesh>
+
+          {/* Mahkota Mini Platinum Eksklusif untuk Bos / Direktur */}
+          {isBoss && (
+            <group position={[0, 0.32, 0]}>
+              <mesh position={[0, 0.02, 0]}>
+                <cylinderGeometry args={[0.13, 0.11, 0.04, 16]} />
+                <meshStandardMaterial color="#cbd5e1" metalness={0.9} roughness={0.18} />
+              </mesh>
+              {[-0.07, 0.07].map((x) =>
+                [-0.07, 0.07].map((z) => (
+                  <mesh key={`${x}-${z}`} position={[x, 0.06, z]}>
+                    <coneGeometry args={[0.025, 0.07, 8]} />
+                    <meshStandardMaterial color="#192A56" metalness={0.8} roughness={0.2} />
+                  </mesh>
+                ))
+              )}
+              <mesh position={[0, 0.04, 0.11]}>
+                <sphereGeometry args={[0.02, 10, 10]} />
+                <meshStandardMaterial color="#0284c7" emissive="#0284c7" emissiveIntensity={2.2} />
+              </mesh>
+            </group>
+          )}
+
+          {/* Antena Radio untuk Green Agent (WhatsApp Gate) */}
+          {!isBoss && id === 'green-agent' && (
+            <group position={[0, 0.30, 0]}>
+              <mesh position={[0, 0.06, 0]}>
+                <cylinderGeometry args={[0.01, 0.015, 0.13, 8]} />
+                <meshStandardMaterial color="#334155" metalness={0.8} />
+              </mesh>
+              <mesh position={[0, 0.14, 0]}>
+                <sphereGeometry args={[0.03, 12, 12]} />
+                <meshStandardMaterial color="#22c55e" emissive="#22c55e" emissiveIntensity={2.8} />
+              </mesh>
+            </group>
+          )}
+
+          {/* Scanner Holografik Beam saat inspeksi */}
+          {isScanning && (
+            <group position={[0, 0, 0.30]} rotation={[0.45, 0, 0]}>
+              <mesh ref={scanBeamRef} position={[0, -0.65, 0.4]}>
+                <coneGeometry args={[0.45, 1.2, 20, 1, true]} />
+                <meshBasicMaterial
+                  color="#38bdf8"
+                  transparent
+                  opacity={0.3}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+              <pointLight color="#38bdf8" intensity={1.8} distance={2.0} />
+            </group>
+          )}
+        </group>
+
+        {/* Sendi Leher Bola Sferis */}
+        <mesh position={[0, 0.14, 0]}>
+          <sphereGeometry args={[0.075, 14, 14]} />
+          <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.8} />
+        </mesh>
+
+        {/* ========================================================= */}
+        {/* 2. TORSO / BADAN ROBOT BULAT HALUS                        */}
+        {/* ========================================================= */}
+        <group position={[0, -0.04, 0]}>
+          {/* Casing Badan Putih Mulus */}
+          <RoundedBox
+            args={[0.46, 0.38, 0.34]}
+            radius={0.10}
+            smoothness={4}
+            castShadow
+            receiveShadow
+          >
+            <meshStandardMaterial color="#FFFFFF" roughness={0.18} metalness={0.08} />
+          </RoundedBox>
+
+          {/* Indikator Garis / Pill Status di Dada */}
+          <mesh position={[0, 0.04, 0.175]}>
+            <capsuleGeometry args={[0.018, 0.09, 8, 12]} />
+            <meshStandardMaterial
+              color={accentColor}
+              emissive={accentColor}
+              emissiveIntensity={2.4}
+            />
+          </mesh>
+
+          {/* Aksen Dasi / Medali Eksekutif untuk Direktur */}
+          {isBoss && (
+            <group position={[0, -0.06, 0.18]}>
+              <mesh>
+                <coneGeometry args={[0.04, 0.10, 4]} rotation={[0, 0, Math.PI]} />
+                <meshStandardMaterial color="#192A56" metalness={0.8} roughness={0.2} />
+              </mesh>
+            </group>
+          )}
+
+          {/* Dual Storage Pods untuk Cubi Vault */}
+          {!isBoss && id === 'orange-agent' && (
+            <group position={[0, 0, -0.19]}>
+              <mesh position={[-0.08, 0, 0]}>
+                <boxGeometry args={[0.07, 0.18, 0.04]} />
+                <meshStandardMaterial color="#334155" metalness={0.85} />
+              </mesh>
+              <mesh position={[0.08, 0, 0]}>
+                <boxGeometry args={[0.07, 0.18, 0.04]} />
+                <meshStandardMaterial color="#334155" metalness={0.85} />
+              </mesh>
+            </group>
+          )}
+        </group>
+
+        {/* ========================================================= */}
+        {/* 3. TANGAN KIRI & KANAN                                    */}
+        {/* ========================================================= */}
+        {/* Tangan Kiri */}
+        <group ref={leftArmRef} position={[-0.25, 0.04, 0]}>
+          <mesh position={[0, 0, 0]}>
+            <sphereGeometry args={[0.042, 12, 12]} />
+            <meshStandardMaterial color={accentColor} metalness={0.3} roughness={0.25} />
+          </mesh>
+          <mesh position={[-0.02, -0.08, 0]}>
+            <capsuleGeometry args={[0.032, 0.08, 8, 12]} />
+            <meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.1} />
+          </mesh>
+          <mesh position={[-0.02, -0.15, 0]}>
+            <sphereGeometry args={[0.036, 12, 12]} />
+            <meshStandardMaterial color={accentColor} roughness={0.25} />
           </mesh>
         </group>
 
-        {/* Tangan Kiri Mini */}
-        <group ref={leftArmRef} position={[-0.34, -0.02, 0]}>
-          <mesh castShadow position={[-0.04, -0.08, 0]}>
-            <capsuleGeometry args={[0.05, 0.14, 12, 16]} />
-            <meshStandardMaterial color={primaryBodyColor} roughness={0.2} metalness={0.2} />
+        {/* Tangan Kanan */}
+        <group ref={rightArmRef} position={[0.25, 0.04, 0]}>
+          <mesh position={[0, 0, 0]}>
+            <sphereGeometry args={[0.042, 12, 12]} />
+            <meshStandardMaterial color={accentColor} metalness={0.3} roughness={0.25} />
           </mesh>
-          {/* Sendi Tangan Metalik */}
-          <mesh position={[-0.01, 0, 0]}>
-            <sphereGeometry args={[0.045, 12, 12]} />
-            <meshStandardMaterial color="#334155" metalness={0.8} />
+          <mesh position={[0.02, -0.08, 0]}>
+            <capsuleGeometry args={[0.032, 0.08, 8, 12]} />
+            <meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.1} />
           </mesh>
-        </group>
-
-        {/* Tangan Kanan Mini */}
-        <group ref={rightArmRef} position={[0.34, -0.02, 0]}>
-          <mesh castShadow position={[0.04, -0.08, 0]}>
-            <capsuleGeometry args={[0.05, 0.14, 12, 16]} />
-            <meshStandardMaterial color={primaryBodyColor} roughness={0.2} metalness={0.2} />
-          </mesh>
-          {/* Sendi Tangan Metalik */}
-          <mesh position={[0.01, 0, 0]}>
-            <sphereGeometry args={[0.045, 12, 12]} />
-            <meshStandardMaterial color="#334155" metalness={0.8} />
+          <mesh position={[0.02, -0.15, 0]}>
+            <sphereGeometry args={[0.036, 12, 12]} />
+            <meshStandardMaterial color={accentColor} roughness={0.25} />
           </mesh>
         </group>
 
-        {/* Kaki Kiri Mini */}
-        <group ref={leftLegRef} position={[-0.14, -0.28, 0]}>
-          <mesh castShadow position={[0, -0.08, 0]}>
-            <cylinderGeometry args={[0.06, 0.07, 0.18, 14]} />
-            <meshStandardMaterial color="#1e293b" roughness={0.3} />
+        {/* ========================================================= */}
+        {/* 4. KAKI KIRI & KANAN                                      */}
+        {/* ========================================================= */}
+        {/* Kaki Kiri */}
+        <group ref={leftLegRef} position={[-0.12, -0.24, 0]}>
+          <mesh position={[0, -0.06, 0]}>
+            <cylinderGeometry args={[0.038, 0.046, 0.12, 12]} />
+            <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.5} />
           </mesh>
-          {/* Sepatu Bantalan Kaki Bawah */}
-          <mesh position={[0, -0.16, 0.03]}>
-            <boxGeometry args={[0.13, 0.05, 0.18]} />
-            <meshStandardMaterial color="#0f172a" roughness={0.5} />
+          <mesh position={[0, -0.13, 0.02]}>
+            <capsuleGeometry args={[0.038, 0.08, 8, 12]} rotation={[Math.PI / 2, 0, 0]} />
+            <meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.1} />
           </mesh>
         </group>
 
-        {/* Kaki Kanan Mini */}
-        <group ref={rightLegRef} position={[0.14, -0.28, 0]}>
-          <mesh castShadow position={[0, -0.08, 0]}>
-            <cylinderGeometry args={[0.06, 0.07, 0.18, 14]} />
-            <meshStandardMaterial color="#1e293b" roughness={0.3} />
+        {/* Kaki Kanan */}
+        <group ref={rightLegRef} position={[0.12, -0.24, 0]}>
+          <mesh position={[0, -0.06, 0]}>
+            <cylinderGeometry args={[0.038, 0.046, 0.12, 12]} />
+            <meshStandardMaterial color="#334155" roughness={0.3} metalness={0.5} />
           </mesh>
-          {/* Sepatu Bantalan Kaki Bawah */}
-          <mesh position={[0, -0.16, 0.03]}>
-            <boxGeometry args={[0.13, 0.05, 0.18]} />
-            <meshStandardMaterial color="#0f172a" roughness={0.5} />
+          <mesh position={[0, -0.13, 0.02]}>
+            <capsuleGeometry args={[0.038, 0.08, 8, 12]} rotation={[Math.PI / 2, 0, 0]} />
+            <meshStandardMaterial color="#FFFFFF" roughness={0.2} metalness={0.1} />
           </mesh>
         </group>
+
       </group>
     </group>
   )
