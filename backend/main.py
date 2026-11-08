@@ -29,6 +29,7 @@ STOK_FILE = os.path.join(WORKSPACE, "stok_cabang.csv")
 BUNDLING_FILE = os.path.join(WORKSPACE, "aturan_bundling.json")
 LEADS_FILE = os.path.join(WORKSPACE, "leads_mentah.csv")
 TEAM_FILE = os.path.join(CONFIG_DIR, "team_config.json")
+AGENCY_AGENTS_FILE = os.path.join(CONFIG_DIR, "agency_agents.json")
 
 # In-memory activity logs
 activity_logs: List[Dict[str, Any]] = [
@@ -268,6 +269,19 @@ class PitchRequest(BaseModel):
     nama: str
     minat: str
     domisili: str
+    persona_id: Optional[str] = "sales-outbound-strategist"
+    persona_name: Optional[str] = "Outbound Strategist"
+    persona_vibe: Optional[str] = ""
+
+@app.get("/api/v1/system/personas")
+def get_personas():
+    if os.path.exists(AGENCY_AGENTS_FILE):
+        try:
+            with open(AGENCY_AGENTS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"personas": []}
 
 @app.post("/api/v1/leads/generate-pitch")
 def generate_pitch(req: PitchRequest):
@@ -304,10 +318,26 @@ def generate_pitch(req: PitchRequest):
             stok_status = f"Ready ({s.get('stok_ready', 1)} unit) di {s.get('cabang')}"
             break
 
+    persona_title = req.persona_name or "Outbound Strategist"
+    persona_vibe = req.persona_vibe or "Signal-based outreach: conversational, punchy, respectful of buyer time, zero fluff"
+
     prompt = f"""
-Anda adalah Sales Representative ramah dan profesional di dealer resmi Astra Motor.
+Anda adalah {persona_title} di dealer resmi Astra Motor.
+Filosofi & Vibe Anda: "{persona_vibe}".
 Buatkan 1 pesan draf WhatsApp pendek (maksimal 3 kalimat) untuk calon pembeli.
 Nama Calon Konsumen: {req.nama}
+Kebutuhan/Minat: {req.minat}
+Unit yang Pas: {target_unit}
+Stok Cabang: {stok_status}
+Bonus Bundling: {bundling_text}
+
+Aturan Penulisan:
+1. Sapa ramah secara personal menyebut nama Kak {req.nama}.
+2. Hubungkan langsung minat konsumen dengan keunggulan unit {target_unit} yang ready di {stok_status} dan bonus {bundling_text}.
+3. Berikan Call-To-Action (CTA) santai untuk jadwalkan test drive atau simulasi angsuran.
+
+Format Output: HANYA berikan isi draf pesan WhatsApp tanpa basa-basi pengantar atau tanda petik.
+"""
 Kebutuhan/Minat: {req.minat}
 Unit yang Pas & Ready: {target_unit}
 Bonus Bundling Spesial: {bundling_text}
