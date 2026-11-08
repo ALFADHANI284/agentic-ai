@@ -1,12 +1,657 @@
 @import "tailwindcss";
+@import "./styles/chaingpt-labs.css";
 
-html, body, #root {
+@font-face {
+  font-family: 'LabsAmiga';
+  src: url('/assets/webflow/664753c2515af09bef5b9826/6647809f28af789ca1b7f574_LABSAmiga-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'RobotoMono';
+  src: url('/assets/webflow/664753c2515af09bef5b9826/66477f2ed2dcb7d90a72f158_RobotoMono-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'RobotoMonoBold';
+  src: url('/assets/webflow/664753c2515af09bef5b9826/6708e0ad4363d574b66cc248_RobotoMono-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --color-canvas: #F8F5EC;
+  --color-primary: #FCFAF3;
+  --color-on-primary: #192A56;
+  --color-ink: #192A56;
+  --color-body: #1E3163;
+  --color-muted: #576574;
+  --color-hairline: #C8C2B3;
+  --color-accent-1: #192A56;
+  --color-neutral-1: #F0ECE1;
+  --color-neutral-2: #0E1A38;
+  --color-neutral-3: #192A56;
+
+  --font-display: "LabsAmiga", sans-serif;
+  --font-stencil: "LabsAmiga", monospace;
+  --font-mono: "RobotoMono", monospace;
+  --font-sans: "RobotoMono", monospace;
+}
+
+:root {
+  --lightgrey: #F8F5EC;
+  --canvas: #F8F5EC;
+  --grey: #C8C2B3;
+  --dark: #192A56;
+  --ink: #192A56;
+  --orange: #FF5B00;
+}
+
+html {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  background-color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color: #0f172a;
+  background-color: #F8F5EC;
+  color: #192A56;
 }
+
+/* Fluid root sizing matching labs.chaingpt.org */
+@media screen and (min-width: 1440px) {
+  html {
+    font-size: calc(16px + 6 * ((100vw - 1440px) / 720));
+  }
+}
+@media screen and (min-width: 320px) and (max-width: 1439px) {
+  html {
+    font-size: calc(14px + 2 * ((100vw - 320px) / 1000));
+  }
+}
+
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #F8F5EC;
+  font-family: "RobotoMono", monospace;
+  color: #1E3163;
+  overflow-x: clip;
+  overflow-y: auto;
+}
+
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Lenis Smooth Scroll Optimizations */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Industrial Color-Blocking Elevation Utilities (Strictly 0px rounded, 0px shadow) */
+.sharp-card {
+  border-radius: 0px !important;
+  box-shadow: none !important;
+  border: 1px solid #9E9E9E;
+  background-color: #F6F6F6;
+}
+
+.sharp-btn-primary {
+  border-radius: 0px !important;
+  box-shadow: none !important;
+  background-color: #ed1e28;
+  color: #FFFFFF;
+  font-family: "RobotoMono", monospace;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.sharp-btn-primary:hover {
+  background-color: #000000;
+  color: #EFEFE5;
+}
+
+.sharp-btn-secondary {
+  border-radius: 0px !important;
+  box-shadow: none !important;
+  background-color: #F6F6F6;
+  color: #0E0E0E;
+  border: 1px solid #9E9E9E;
+  font-family: "RobotoMono", monospace;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 24px;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.sharp-btn-secondary:hover {
+  background-color: #000000;
+  color: #FFFFFF;
+  border-color: #000000;
+}
+
+/* Decorative Crosshairs */
+.decor-crosshair {
+  position: relative;
+}
+.decor-crosshair::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  border-top: 1px solid #ed1e28;
+  border-left: 1px solid #ed1e28;
+}
+.decor-crosshair::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  border-bottom: 1px solid #ed1e28;
+  border-right: 1px solid #ed1e28;
+}
+
+/* Brutalist architectural background grid (Navy & Cream pattern) */
+.bg-grid-pattern {
+  background-size: 64px 64px;
+  background-image: 
+    linear-gradient(to right, rgba(25, 42, 86, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(25, 42, 86, 0.08) 1px, transparent 1px);
+}
+
+/* Ensure button chamfer polygon uses Navy & Cream */
+.button-primary {
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  padding: 0 !important;
+  display: inline-block !important;
+  position: relative !important;
+  text-decoration: none !important;
+  line-height: normal !important;
+  cursor: pointer !important;
+}
+
+.button-primary-border {
+  background-color: #192A56 !important;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px) !important;
+  padding: 1.5px !important;
+  display: block !important;
+  transition: background-color 0.2s ease;
+}
+
+.button-primary-text {
+  background-color: #192A56 !important;
+  color: #F8F5EC !important;
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px) !important;
+  padding: 0.65rem 1.4rem !important;
+  font-family: 'RobotoMono', monospace !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 0px !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.button-primary:hover .button-primary-border {
+  background-color: #0E1A38 !important;
+}
+
+.button-primary:hover .button-primary-text {
+  background-color: #0E1A38 !important;
+  color: #FFFFFF !important;
+}
+
+/* FAQ Accordion Styling: Strictly Navy & Cream (Zero Blue #2563EB & Zero Orange) */
+.product-menu-icon-dot {
+  background-color: #192A56 !important;
+}
+
+.faq-accordion-btn-inner,
+.faq-item .accordion-button-inner {
+  background-color: rgba(25, 42, 86, 0.22) !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.faq-accordion-btn-frame,
+.faq-item .accordion-button-frame {
+  background-color: #F8F5EC !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.faq-accordion-icon,
+.faq-item .accordion-toggle-icon {
+  filter: none;
+  transition: transform 0.25s ease, filter 0.22s ease !important;
+}
+
+/* Hover and Active/Open States: Solid Deep Navy Frame & Inverted White Icon */
+.accordion-toggle:hover .faq-accordion-btn-inner,
+.accordion-toggle:hover .accordion-button-inner,
+.accordion-button:hover .faq-accordion-btn-inner,
+.accordion-button:hover .accordion-button-inner,
+.faq-accordion-btn-inner.is-active,
+.accordion.w--open .faq-accordion-btn-inner,
+.accordion.w--open .accordion-button-inner {
+  background-color: #192A56 !important;
+}
+
+.accordion-toggle:hover .faq-accordion-btn-frame,
+.accordion-toggle:hover .accordion-button-frame,
+.accordion-button:hover .faq-accordion-btn-frame,
+.accordion-button:hover .accordion-button-frame,
+.faq-accordion-btn-frame:hover,
+.accordion-button-frame:hover,
+.faq-accordion-btn-frame.is-active,
+.accordion.w--open .faq-accordion-btn-frame,
+.accordion.w--open .accordion-button-frame {
+  background-color: #192A56 !important;
+}
+
+.accordion-toggle:hover .faq-accordion-icon,
+.accordion-toggle:hover .accordion-toggle-icon,
+.accordion-button:hover .faq-accordion-icon,
+.accordion-button:hover .accordion-toggle-icon,
+.faq-accordion-icon.is-active,
+.accordion.w--open .faq-accordion-icon,
+.accordion.w--open .accordion-toggle-icon {
+  filter: brightness(0) invert(1) !important;
+}
+
+/* Active ScrollSpy Corner Brackets: Hanya Kanan Atas dan Kiri Bawah (Sesuai Permintaan) */
+.header-menu-link-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+}
+
+.nav-corner {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Kanan Atas (Top-Right) */
+.nav-corner-tr {
+  top: 0px;
+  right: 0px;
+  border-top: 2px solid #192A56;
+  border-right: 2px solid #192A56;
+  transform: translate(2px, -2px);
+}
+
+/* Kiri Bawah (Bottom-Left) */
+.nav-corner-bl {
+  bottom: 0px;
+  left: 0px;
+  border-bottom: 2px solid #192A56;
+  border-left: 2px solid #192A56;
+  transform: translate(-2px, 2px);
+}
+
+/* When Hovered or Active Section, snap into place */
+.header-menu-link:hover .nav-corner,
+.header-menu-link.is-active .nav-corner {
+  opacity: 1 !important;
+  transform: translate(0, 0) !important;
+}
+
+.header-menu-link.is-active .header-menu-link-text {
+  color: #192A56 !important;
+  font-weight: 700 !important;
+}
+
+/* Marquee Running Text Animation for AICREW */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: marqueeScroll 60s linear infinite !important;
+}
+
+/* Hide root scrollbar completely on desktop while keeping smooth scrolling active */
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+html, body {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Any internal container scrollbar must strictly be sleek Navy & Cream (Zero Orange) */
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+*::-webkit-scrollbar-track {
+  background: #F8F5EC !important;
+}
+*::-webkit-scrollbar-thumb {
+  background: #192A56 !important;
+  border-radius: 0px !important;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #0E1A38 !important;
+}
+
+/* Scroll Animation Keyframes & Classes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+@keyframes floatWave {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: floatWave 4s ease-in-out infinite;
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero Robot Descent & Conduit Seamless Overflow */
+.hero-section {
+  overflow: visible !important;
+}
+.hero-wrapper, .hero-top, .hero-top-content {
+  overflow: visible !important;
+}
+
+/* Zero Orange Artifacts: Eliminate any stray orange squares near Hero or Navbar */
+.hero-square {
+  background-color: #192A56 !important;
+}
+
+/* Ensure clean layout for Hero info and partners */
+.hero-main {
+  min-height: auto !important;
+}
+.hero-partners {
+  background-color: transparent !important;
+}
+
+/* Vertical Conduit Hydro-Bubbles */
+.capital-incubation-chain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.capital-incubation-bubbles {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes bubbleRise {
+  0% {
+    transform: translateY(105vh) scale(0.65);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.6;
+  }
+  85% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-10vh) scale(1.1);
+    opacity: 0;
+  }
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), rgba(25, 42, 86, 0.3));
+  box-shadow: 0 0 6px rgba(25, 42, 86, 0.15);
+  animation-name: bubbleRise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* ========================================================================= */
+/* 1. BULLETPROOF BUTTON & TEXT CONTRAST (Never Blends with Background)     */
+/* ========================================================================= */
+/* Dark Navy Buttons (#192A56) must ALWAYS have high-contrast Cream text (#F8F5EC) */
+button[class*="bg-[#192A56]"],
+a[class*="bg-[#192A56]"],
+.btn-navy {
+  background-color: #192A56 !important;
+  color: #F8F5EC !important;
+}
+button[class*="bg-[#192A56]"] *,
+a[class*="bg-[#192A56]"] *,
+.btn-navy * {
+  color: #F8F5EC !important;
+}
+button[class*="bg-[#192A56]"] svg,
+a[class*="bg-[#192A56]"] svg,
+.btn-navy svg {
+  stroke: #F8F5EC !important;
+}
+
+/* Orange Accent Buttons (#FF5B00) must ALWAYS have dark text (#0A0E1A) */
+button[class*="bg-[#FF5B00]"],
+a[class*="bg-[#FF5B00]"],
+.btn-orange {
+  background-color: #FF5B00 !important;
+  color: #0A0E1A !important;
+}
+button[class*="bg-[#FF5B00]"] *,
+a[class*="bg-[#FF5B00]"] *,
+.btn-orange * {
+  color: #0A0E1A !important;
+}
+button[class*="bg-[#FF5B00]"] svg,
+a[class*="bg-[#FF5B00]"] svg,
+.btn-orange svg {
+  stroke: #0A0E1A !important;
+  fill: #0A0E1A !important;
+}
+
+/* White/Cream Inactive Buttons must ALWAYS have Navy text (#192A56) */
+button[class*="bg-white"],
+button[class*="bg-[#F8F5EC]"] {
+  color: #192A56 !important;
+}
+
+/* ========================================================================= */
+/* 2. CONTINUOUS UNBROKEN 4-COLUMN ARCHITECTURAL BLUEPRINT GRID (Top to Bottom) */
+/* ========================================================================= */
+.body-lines-wrap {
+  z-index: 35 !important;
+  pointer-events: none !important;
+  display: block !important;
+  position: fixed !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 2.75rem !important;
+  right: 2.75rem !important;
+}
+
+@media screen and (min-width: 1440px) {
+  .body-lines-wrap {
+    left: 3.75rem !important;
+    right: 3.75rem !important;
+  }
+}
+@media screen and (max-width: 991px) {
+  .body-lines-wrap {
+    left: 2.75rem !important;
+    right: 2.75rem !important;
+  }
+}
+@media screen and (max-width: 767px) {
+  .body-lines-wrap {
+    left: 1.42rem !important;
+    right: 1.42rem !important;
+  }
+}
+@media screen and (max-width: 479px) {
+  .body-lines-wrap {
+    left: 1.2rem !important;
+    right: 1.2rem !important;
+  }
+}
+
+.body-line {
+  background-color: rgba(25, 42, 86, 0.22) !important;
+  width: 1px !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  display: block !important;
+}
+
+/* Pastikan semua 5 garis (membentuk 4 kotak sejajar) SELALU TAMPIL di SEMUA viewport */
+.body-line.left {
+  left: 0% !important;
+  display: block !important;
+}
+.body-line.left-middle {
+  left: 25% !important;
+  display: block !important;
+}
+.body-line.center {
+  left: 50% !important;
+  display: block !important;
+}
+.body-line.right-middle {
+  left: 75% !important;
+  right: auto !important;
+  display: block !important;
+}
+.body-line.right {
+  left: 100% !important;
+  right: auto !important;
+  display: block !important;
+}
+
+/* ========================================================================= */
+/* 3. CAPSULE MBG STASIS BUBBLES                                             */
+/* ========================================================================= */
+.capsule-bubble {
+  position: absolute !important;
+  bottom: 0 !important;
+  border-radius: 9999px !important;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), rgba(248, 245, 236, 0.85) 55%, rgba(25, 42, 86, 0.3) 95%) !important;
+  border: 1.5px solid rgba(25, 42, 86, 0.5) !important;
+  box-shadow: 0 0 10px rgba(25, 42, 86, 0.2), inset 0 0 4px rgba(255, 255, 255, 0.8) !important;
+  pointer-events: none !important;
+  animation: capsuleBubbleRise 4.5s infinite ease-in !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: monospace !important;
+  font-weight: 800 !important;
+  color: #192A56 !important;
+  letter-spacing: -0.05em !important;
+  user-select: none !important;
+}
+
+.capsule-bubble.bubble-1 { left: 18% !important; width: 28px !important; height: 28px !important; font-size: 8px !important; animation-duration: 4.2s !important; animation-delay: 0s !important; }
+.capsule-bubble.bubble-2 { left: 56% !important; width: 34px !important; height: 34px !important; font-size: 10px !important; animation-duration: 5.2s !important; animation-delay: 0.8s !important; }
+.capsule-bubble.bubble-3 { left: 34% !important; width: 26px !important; height: 26px !important; font-size: 8px !important; animation-duration: 3.8s !important; animation-delay: 1.6s !important; }
+.capsule-bubble.bubble-4 { left: 68% !important; width: 30px !important; height: 30px !important; font-size: 9px !important; animation-duration: 4.6s !important; animation-delay: 2.3s !important; }
+.capsule-bubble.bubble-5 { left: 12% !important; width: 32px !important; height: 32px !important; font-size: 9px !important; animation-duration: 5.5s !important; animation-delay: 1.1s !important; }
+.capsule-bubble.bubble-6 { left: 44% !important; width: 26px !important; height: 26px !important; font-size: 8px !important; animation-duration: 3.6s !important; animation-delay: 2.9s !important; }
+
+
+
+

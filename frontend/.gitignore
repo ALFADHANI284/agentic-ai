@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Assets referensi dan dokumen lokal
+ai/
+Prompt.md
+design.md
